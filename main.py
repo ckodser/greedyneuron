@@ -35,7 +35,7 @@ if __name__ == "__main__":
     dataset_name = args.dataset
     hidden_layers = list(map(int, args.model_layers.split(",")))
     mode = args.mode
-    c_run_name = f"{args.run_name}_{dataset_name}_MODE{mode}_MODEL_{args.model_type}_{str(hidden_layers)[1:-1]}_BS{batch_size}_LR{lr}_E{epochs}"
+    c_run_name = f"{args.run_name}_{dataset_name}_MODE{mode}_MODEL_{args.model_type}_{str(hidden_layers)[1:-1]}_BS{batch_size}_LR{lr}_E{epochs}_{args.extravert_mult}{args.extravert_bias}"
 
 
     print(c_run_name)
