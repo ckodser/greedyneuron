@@ -113,4 +113,4 @@ if __name__ == "__main__":
     set_to_eval(model)
     strong_robust_eval(model, testDataloader, loss_func, pgd_eps, iters, dataset_name)
     strong_sparse_eval(model, testDataloader, loss_func)
-    torch.save(model.state_dict(), f"checkpoints/{c_run_name}/last.pth")
+    # torch.save(model.state_dict(), f"checkpoints/{c_run_name}/last.pth")
