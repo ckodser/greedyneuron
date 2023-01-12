@@ -19,7 +19,7 @@ def start_writer(name, mode="tensorboard", dict=None):
     else:
         import wandb
         runwandb = wandb.init(
-            project="greedyNeuron1",
+            project="greedyNeuron2",
             name=name,
             config=dict)
 
