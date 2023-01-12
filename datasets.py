@@ -36,8 +36,8 @@ def get_dataloaders(dataset_name, batch_size):
 
     # build data loaders
     trainDataloader = DataLoader(trainDataset,
-                                 batch_size=batch_size, num_workers=0, sampler=None, drop_last=True, shuffle=True)
+                                 batch_size=batch_size, num_workers=0, sampler=None, shuffle=True)
 
     testDataloader = DataLoader(testDataset,
-                                batch_size=batch_size, num_workers=0, sampler=None, drop_last=True, shuffle=True)
+                                batch_size=batch_size, num_workers=0, sampler=None, shuffle=True)
     return trainDataloader, testDataloader
