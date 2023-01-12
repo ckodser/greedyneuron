@@ -24,7 +24,7 @@ def get_dataloaders(dataset_name, batch_size):
         'FashionMNIST': [transforms.RandomCrop(28, padding=1, padding_mode='edge')]
     }
 
-    dataset_class = torchvision.datasets.FashionMNIST
+    dataset_class = torchvision.datasets.FashionMNIST if dataset_name == "FashionMNIST" else torchvision.datasets.MNIST
     default_transform = [transforms.ToTensor(),
                          transforms.Normalize(mean[dataset_name], [std[dataset_name]] * len(mean[dataset_name]))]
 
