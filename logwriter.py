@@ -19,8 +19,8 @@ def start_writer(name, mode="tensorboard", dict=None):
     else:
         import wandb
         runwandb = wandb.init(
-            project="teste4",
-            run_name=name,
+            project="greedyNeuron1",
+            name=name,
             config=dict)
 
 
