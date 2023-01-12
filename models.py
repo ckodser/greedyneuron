@@ -136,7 +136,7 @@ class GreedyLinearPlainExtraverts(GreedyLinearPlain):
         super(GreedyLinearPlainExtraverts, self).__init__(input_feature, output_feature)
         self.linearGradChangerExtraverts = LinearGradChangerExtraverts(output_feature)
         self.extravertish = torch.nn.parameter.Parameter(
-            data=torch.exp(torch.randn(output_feature, 1)/3),
+            data=torch.exp(torch.randn(output_feature, 1)/2+0.2),
             requires_grad=False)
         plt.hist(self.extravertish.numpy())
         plt.show()
