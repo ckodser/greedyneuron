@@ -132,11 +132,11 @@ class GreedyLinearPlain(nn.Module):
 
 
 class GreedyLinearPlainExtraverts(GreedyLinearPlain):
-    def __init__(self, input_feature, output_feature):
+    def __init__(self, input_feature, output_feature, extravert_mult, extravert_bias):
         super(GreedyLinearPlainExtraverts, self).__init__(input_feature, output_feature)
         self.linearGradChangerExtraverts = LinearGradChangerExtraverts(output_feature)
         self.extravertish = torch.nn.parameter.Parameter(
-            data=torch.exp(torch.randn(output_feature, 1)/2+0.2),
+            data=torch.exp(torch.randn(output_feature, 1)*extravert_mult)+extravert_bias,
             requires_grad=False)
         plt.hist(self.extravertish.numpy())
         plt.show()
@@ -148,7 +148,7 @@ class GreedyLinearPlainExtraverts(GreedyLinearPlain):
 
 
 class GLinear(nn.Module):
-    def __init__(self, input_size, output_size, mode, activation):
+    def __init__(self, input_size, output_size, mode, activation, extravert_mult=1, extravert_bias=0):
         super().__init__()
         self.mode = mode
         self.activation = activation
@@ -158,7 +158,7 @@ class GLinear(nn.Module):
         if self.mode == "greedy":
             self.linear = GreedyLinearPlain(input_size, output_size)
         if self.mode == "greedyExtraverts":
-            self.linear = GreedyLinearPlainExtraverts(input_size, output_size)
+            self.linear = GreedyLinearPlainExtraverts(input_size, output_size, extravert_mult, extravert_bias)
 
         if self.mode == "intel":
             self.bn = nn.BatchNorm1d(output_size, affine=False)
@@ -198,15 +198,15 @@ class GConv2d(nn.Module):
 
 # model
 class ClassifierMLP(torch.nn.Module):
-    def __init__(self, hidden_layer_size, class_num, mode):
+    def __init__(self, hidden_layer_size, class_num, mode, extravert_mult, extravert_bias):
         super(ClassifierMLP, self).__init__()
         self.layers = []
         input_size = 784
         self.mode = mode
         for i, h in enumerate(hidden_layer_size):
-            self.layers.append(GLinear(input_size, h, mode, nn.ReLU()))
+            self.layers.append(GLinear(input_size, h, mode, nn.ReLU(), extravert_mult, extravert_bias))
             input_size = h
-        self.layers.append(GLinear(input_size, class_num, mode, None))
+        self.layers.append(GLinear(input_size, class_num, mode, None, extravert_mult, extravert_bias))
         self.deep = nn.Sequential(*self.layers)
 
     def forward(self, x, t=1):
