@@ -33,12 +33,27 @@ if __name__ == "__main__":
     dataset_name = args.dataset
     hidden_layers = list(map(int, args.model_layers.split(",")))
     mode = args.mode
-    c_run_name=f"{args.run_name}_{dataset_name}_MODE{mode}_MODEL_{args.model_type}_{str(hidden_layers)[1:-1]}_BS{batch_size}_LR{lr}"
+    c_run_name = f"{args.run_name}_{dataset_name}_MODE{mode}_MODEL_{args.model_type}_{str(hidden_layers)[1:-1]}_BS{batch_size}_LR{lr}"
 
-    start_writer(c_run_name)
+
     print(c_run_name)
     run = args.run_name
     noise_eps, pgd_eps, iters = 2, 0.5, 10
+    config = {
+        "learning_rate": lr,
+        "epochs": epochs,
+        "batch_size": batch_size,
+        "dataset_name": dataset_name,
+        "mode": args.mode,
+        "seed": args.seed,
+        "model_type": args.model_type,
+        "model_layers": args.model_layers,
+        "number_of_worker": args.number_of_worker,
+        "noise_eps": noise_eps,
+        "pgd_eps": pgd_eps,
+        "pgd_iters": iters
+    }
+    start_writer(c_run_name, "wandb", config)
 
     # datasets
     trainDataloader, testDataloader = datasets.get_dataloaders(dataset_name, batch_size)

@@ -1,5 +1,6 @@
 from torch.utils.tensorboard import SummaryWriter
 import datetime
+import wandb
 
 # Writer will output to ./runs/ directory by default
 writer = None
@@ -17,7 +18,10 @@ def start_writer(name, mode="tensorboard", dict=None):
         writer = SummaryWriter("runs/" + name + "_" + str(datetime.datetime.now()).replace(":", "."))
     else:
         import wandb
-        runwandb = wandb.init(dict)
+        runwandb = wandb.init(
+            project="teste4",
+            run_name=name,
+            config=dict)
 
 
 def iter_by_epoch(epoch, step):
@@ -39,6 +43,7 @@ def log(group, value, epoch, step=None, silent=False, translate=True):
     if writer_mode == "tensorboard":
         writer.add_scalar(group, value, iter)
     else:
-        raise NotImplementedError
+        wandb.log({group: value,'epoch': epoch, 'batch': step})
+
     if not silent:
         print(f"{group}: {value}, epoch:{epoch} step:{step}")
