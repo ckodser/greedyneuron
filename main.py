@@ -10,8 +10,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_type', default='MLP', type=str,
                         choices={'MLP', 'CNN', "LeNET"})
-    parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str,
-                        choices={'Linear', 'CNN'})
+    parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str,)
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal', 'intel', 'greedyExtraverts'})
     parser.add_argument('--dataset', default='MNIST', type=str, choices={'MNIST', "FashionMNIST"})
     parser.add_argument('--learning_rate', default=0.052, type=float)
@@ -61,7 +60,7 @@ if __name__ == "__main__":
     trainDataloader, testDataloader = datasets.get_dataloaders(dataset_name, batch_size)
 
     if args.model_type == "CNN":
-        model = ClassifierCNN(hidden_layers, 10, mode).to(device)
+        model = ClassifierCNN(hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "MLP":
         model = ClassifierMLP(hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "LeNET":

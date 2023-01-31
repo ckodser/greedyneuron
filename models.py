@@ -112,6 +112,30 @@ class GreedyConv2dPlain(nn.Module):
         O = self.convGradChanger(A, input, self.weight)
         return O + self.bias.view(1, -1, 1, 1)
 
+class GreedyConv2dPlainExtraverts(nn.Module):
+    def __init__(self, input_feature, output_feature, kernel_size, extravert_mult, extravert_bias,
+                 stride, padding):
+        super().__init__()
+        raise NotImplementedError
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+
+        conv = nn.Conv2d(input_feature, output_feature, kernel_size, stride)
+        self.weight = torch.nn.parameter.Parameter(data=conv.weight.clone(), requires_grad=True)
+        self.bias = torch.nn.parameter.Parameter(data=conv.bias.clone(), requires_grad=True)
+        self.register_parameter("Gconv2dweight", self.weight)
+        self.register_parameter("Gconv2dbias", self.bias)
+        with torch.no_grad():
+            self.bias_initial_norm = torch.linalg.norm(self.bias.data)
+            self.weigth_initial_norm = torch.linalg.matrix_norm(self.weight.data)
+        self.convGradChanger = ConvGradChanger(self.stride, self.padding)
+
+    def forward(self, input):
+        A = F.conv2d(input, self.weight, torch.zeros(self.weight.shape[0], device=self.weight.device),
+                     self.stride, self.padding)
+        O = self.convGradChanger(A, input, self.weight)
+        return O + self.bias.view(1, -1, 1, 1)
 
 class GreedyLinearPlain(nn.Module):
     def __init__(self, input_feature, output_feature):
@@ -173,16 +197,19 @@ class GLinear(nn.Module):
 
 
 class GConv2d(nn.Module):
-    def __init__(self, input_feature, output_feature, kernel_size, stride, padding, mode, activation):
+    def __init__(self, input_feature, output_feature, kernel_size, stride, padding, mode, activation, extravert_mult, extravert_bias):
         super().__init__()
         assert mode in ["greedy", "normal", "intel"]
         self.mode = mode
         self.activation = activation
         if self.mode == "normal":
             self.conv2d = torch.nn.Conv2d(input_feature, output_feature, kernel_size, stride)
-        else:
+        if self.mode == "greedy":
             self.conv2d = GreedyConv2dPlain(input_feature, output_feature, kernel_size,
                                             stride=stride, padding=padding)
+        if self.mode == "greedyExtraverts":
+            self.linear = GreedyConv2dPlainExtraverts(input_feature, output_feature, kernel_size, extravert_mult,
+                                                      extravert_bias, stride=stride, padding=padding)
 
         if self.mode == "intel":
             self.bn = nn.BatchNorm2d(output_feature)
@@ -216,17 +243,17 @@ class ClassifierMLP(torch.nn.Module):
 
 
 class ClassifierCNN(torch.nn.Module):
-    def __init__(self, hidden_featuer_num, class_num, mode):
+    def __init__(self, hidden_featuer_num, class_num, mode, extravert_mult, extravert_bias):
         super(ClassifierCNN, self).__init__()
         self.layers = []
         input_feature = 1
         self.mode = mode
         for i, h in enumerate(hidden_featuer_num):
-            self.layers.append(GConv2d(input_feature, h, 3, 1, mode, nn.ReLU()))
+            self.layers.append(GConv2d(input_feature, h, 3, 1, 0, mode, nn.ReLU(), extravert_mult, extravert_bias))
             input_feature = h
         self.layers.append(torch.nn.AvgPool2d(28 - 2 * len(hidden_featuer_num)))
         self.layers.append(torch.nn.Flatten(start_dim=1))
-        self.layers.append(GLinear(hidden_featuer_num[-1], class_num, mode, None))
+        self.layers.append(GLinear(hidden_featuer_num[-1], class_num, mode, None, extravert_mult, extravert_bias))
         self.deep = nn.Sequential(*self.layers)
 
     def forward(self, x, t=1):
