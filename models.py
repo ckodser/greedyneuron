@@ -260,6 +260,25 @@ class ClassifierCNN(torch.nn.Module):
         x = self.deep(x)
         return x * t
 
+class ClassifierCNNWide(torch.nn.Module):
+    def __init__(self, hidden_featuer_num, class_num, mode, extravert_mult, extravert_bias):
+        super(ClassifierCNNWide, self).__init__()
+        self.layers = []
+        input_feature = 1
+        self.mode = mode
+        for i, h in enumerate(hidden_featuer_num):
+            self.layers.append(GConv2d(input_feature, h, 7, 1, 0, mode, nn.Sequential(
+                nn.ReLU(), nn.MaxPool2d(2)), extravert_mult, extravert_bias))
+            input_feature = h
+        self.layers.append(torch.nn.AvgPool2d(2))
+        self.layers.append(torch.nn.Flatten(start_dim=1))
+        self.layers.append(GLinear(hidden_featuer_num[-1], class_num, mode, None, extravert_mult, extravert_bias))
+        self.deep = nn.Sequential(*self.layers)
+
+
+    def forward(self, x, t=1):
+        x = self.deep(x)
+        return x * t
 
 def forward(self, x):
     out = self.layer1(x)

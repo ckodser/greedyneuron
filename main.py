@@ -9,7 +9,7 @@ import argparse
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_type', default='MLP', type=str,
-                        choices={'MLP', 'CNN', "LeNET"})
+                        choices={'MLP', 'CNN', 'CNNWide', "LeNET"})
     parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str,)
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal', 'intel', 'greedyExtraverts'})
     parser.add_argument('--dataset', default='MNIST', type=str, choices={'MNIST', "FashionMNIST"})
@@ -54,13 +54,15 @@ if __name__ == "__main__":
         "pgd_eps": pgd_eps,
         "pgd_iters": iters
     }
-    start_writer(c_run_name, "wandb", config)
-
+    # start_writer(c_run_name, "wandb", config)
+    start_writer(c_run_name, "tensorboard", config)
     # datasets
     trainDataloader, testDataloader = datasets.get_dataloaders(dataset_name, batch_size)
 
     if args.model_type == "CNN":
         model = ClassifierCNN(hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
+    if args.model_type == "CNNWide":
+        model = ClassifierCNNWide(hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "MLP":
         model = ClassifierMLP(hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "LeNET":
