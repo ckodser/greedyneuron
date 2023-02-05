@@ -66,11 +66,13 @@ def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True
 # datasets
 pgd_mean = {
     'MNIST': np.array([0.1307]),
-    'FashionMNIST': np.array([0.2859])
+    'FashionMNIST': np.array([0.2859]),
+    'cifar10': np.array([0.49139968, 0.48215827 ,0.44653124])
 }
 pgd_std = {
     'MNIST': 0.3081,
-    'FashionMNIST': 0.2859
+    'FashionMNIST': 0.2859,
+    'cifar10': np.array([0.24703233, 0.24348505, 0.26158768])
 }
 
 

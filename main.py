@@ -54,8 +54,8 @@ if __name__ == "__main__":
         "pgd_eps": pgd_eps,
         "pgd_iters": iters
     }
-    start_writer(c_run_name, "wandb", config)
-    # start_writer(c_run_name, "tensorboard", config)
+    # start_writer(c_run_name, "wandb", config)
+    start_writer(c_run_name, "tensorboard", config)
     # datasets
     trainDataloader, testDataloader, input_shape = datasets.get_dataloaders(dataset_name, batch_size)
 
@@ -108,6 +108,7 @@ if __name__ == "__main__":
                 if step == 0:
                     print("TRACK MODEL")
                     track_model(model, epoch, step)
+                break
         scheduler.step()
         set_to_eval(model)
         normal_eval(model, testDataloader, epoch, loss_func)
