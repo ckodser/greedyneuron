@@ -57,14 +57,14 @@ if __name__ == "__main__":
     start_writer(c_run_name, "wandb", config)
     # start_writer(c_run_name, "tensorboard", config)
     # datasets
-    trainDataloader, testDataloader = datasets.get_dataloaders(dataset_name, batch_size)
+    trainDataloader, testDataloader, input_shape = datasets.get_dataloaders(dataset_name, batch_size)
 
     if args.model_type == "CNN":
-        model = ClassifierCNN(hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
+        model = ClassifierCNN(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "CNNWide":
-        model = ClassifierCNNWide(hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
+        model = ClassifierCNNWide(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "MLP":
-        model = ClassifierMLP(hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
+        model = ClassifierMLP(input_shape[0]*input_shape[1]*input_shape[2],hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "LeNET":
         model = LeNet(10, mode).to(device)
     loss_func = torch.nn.CrossEntropyLoss()

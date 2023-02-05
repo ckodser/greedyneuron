@@ -225,10 +225,10 @@ class GConv2d(nn.Module):
 
 # model
 class ClassifierMLP(torch.nn.Module):
-    def __init__(self, hidden_layer_size, class_num, mode, extravert_mult, extravert_bias):
+    def __init__(self, input_feature, hidden_layer_size, class_num, mode, extravert_mult, extravert_bias):
         super(ClassifierMLP, self).__init__()
         self.layers = []
-        input_size = 784
+        input_size = input_feature
         self.mode = mode
         for i, h in enumerate(hidden_layer_size):
             self.layers.append(GLinear(input_size, h, mode, nn.ReLU(), extravert_mult, extravert_bias))
@@ -243,10 +243,10 @@ class ClassifierMLP(torch.nn.Module):
 
 
 class ClassifierCNN(torch.nn.Module):
-    def __init__(self, hidden_featuer_num, class_num, mode, extravert_mult, extravert_bias):
+    def __init__(self, input_feature, hidden_featuer_num, class_num, mode, extravert_mult, extravert_bias):
         super(ClassifierCNN, self).__init__()
         self.layers = []
-        input_feature = 1
+        input_feature = input_feature
         self.mode = mode
         for i, h in enumerate(hidden_featuer_num):
             self.layers.append(GConv2d(input_feature, h, 3, 1, 0, mode, nn.ReLU(), extravert_mult, extravert_bias))
@@ -261,10 +261,10 @@ class ClassifierCNN(torch.nn.Module):
         return x * t
 
 class ClassifierCNNWide(torch.nn.Module):
-    def __init__(self, hidden_featuer_num, class_num, mode, extravert_mult, extravert_bias):
+    def __init__(self, input_feature, hidden_featuer_num, class_num, mode, extravert_mult, extravert_bias):
         super(ClassifierCNNWide, self).__init__()
         self.layers = []
-        input_feature = 1
+        input_feature = input_feature
         self.mode = mode
         for i, h in enumerate(hidden_featuer_num):
             self.layers.append(GConv2d(input_feature, h, 7, 1, 0, mode, nn.Sequential(

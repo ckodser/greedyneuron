@@ -36,6 +36,8 @@ def get_dataloaders(dataset_name, batch_size):
                                       transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2), # Set the color params
                                ]
     }
+    input_shape={  'MNIST': [1,28,28], 'FashionMNIST': [1,28,28], 'cifar10': [3,32,32] }
+
 
     dataset_class = dataset_classes[dataset_name]
     default_transform = [transforms.ToTensor(),
@@ -53,4 +55,4 @@ def get_dataloaders(dataset_name, batch_size):
 
     testDataloader = DataLoader(testDataset,
                                 batch_size=batch_size, num_workers=1, sampler=None, shuffle=True, pin_memory=True)
-    return trainDataloader, testDataloader
+    return trainDataloader, testDataloader, input_shape[dataset_name]
