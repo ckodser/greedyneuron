@@ -82,8 +82,8 @@ def pgd_attack(model, images, labels, dataset_name, eps=0.3, alpha=2 / 255, iter
     loss = nn.CrossEntropyLoss()
 
     ori_images = images.data
-    min_val = ((0 - pgd_mean[dataset_name][0]) / pgd_std[dataset_name])
-    max_val = (1 - pgd_mean[dataset_name][0]) / pgd_mean[dataset_name][0]
+    min_val = min(((0 - pgd_mean[dataset_name][0]) / pgd_std[dataset_name]))
+    max_val = max((1 - pgd_mean[dataset_name][0]) / pgd_mean[dataset_name][0])
     for i in range(iters):
         images.requires_grad = True
         outputs = model(images, t)
@@ -100,8 +100,8 @@ def pgd_attack(model, images, labels, dataset_name, eps=0.3, alpha=2 / 255, iter
 
 
 def add_noise(images, eps, dataset_name, device="cuda"):
-    min_val = ((0 - pgd_mean[dataset_name][0]) / pgd_std[dataset_name])
-    max_val = (1 - pgd_mean[dataset_name][0]) / pgd_std[dataset_name]
+    min_val = min(((0 - pgd_mean[dataset_name][0]) / pgd_std[dataset_name]))
+    max_val = max((1 - pgd_mean[dataset_name][0]) / pgd_std[dataset_name])
     eta = torch.normal(0.0, eps / 2, images.shape, device=device)
     images = torch.clamp(images + eta, min=min_val, max=max_val).detach_()
     return images
