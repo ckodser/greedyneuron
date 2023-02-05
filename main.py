@@ -12,7 +12,7 @@ def get_args():
                         choices={'MLP', 'CNN', 'CNNWide', "LeNET"})
     parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str,)
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal', 'intel', 'greedyExtraverts'})
-    parser.add_argument('--dataset', default='MNIST', type=str, choices={'MNIST', "FashionMNIST"})
+    parser.add_argument('--dataset', default='MNIST', type=str, choices={'MNIST', "FashionMNIST", "cifar10", "cifar100"})
     parser.add_argument('--learning_rate', default=0.052, type=float)
     parser.add_argument('--batch_size', default=512, type=int)
     parser.add_argument('--number_of_worker', default=1, type=int)
