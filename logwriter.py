@@ -1,6 +1,6 @@
 from torch.utils.tensorboard import SummaryWriter
 import datetime
-# import wandb
+import wandb
 
 # Writer will output to ./runs/ directory by default
 writer = None
