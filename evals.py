@@ -38,6 +38,35 @@ def track_model(model, epoch, step=0):
 
 #                 print(name)
 # %%
+def normal_eval_forgetting(model, testDataloaders, epoch, loss_func, device="cuda", log=True):
+    for task_id in range(len(testDataloaders)):
+        testDataloader=testDataloaders[task_id]
+        with torch.no_grad():
+            correct = 0
+            total = 0
+            loss = 0
+            for step, (x, y) in enumerate(testDataloader):
+                # forward pass
+                x, y = x.to(device), y.to(device)
+                output = model(x)
+                output[:, : 2 * task_id] = -100000000
+                output[:, 2 * task_id + 2:] = -10000000
+
+                loss_c = loss_func(output, y)
+                output = torch.argmax(output, dim=1)
+                loss += loss_c.detach().item()
+                total += x.shape[0]
+                correct += torch.sum(y == output).detach().item()
+
+            acc = (correct / total)
+            loss = loss / len(testDataloader)
+            if log:
+                logwriter.log(f"performance_eval/test_loss_{task_id}", loss, epoch)
+                logwriter.log(f"performance_eval/test_accuracy_{task_id}", acc, epoch)
+            else:
+                return acc, loss
+
+
 def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True):
     with torch.no_grad():
         correct = 0
