@@ -49,14 +49,13 @@ def normal_eval_forgetting(model, testDataloaders, epoch, loss_func, device="cud
                 # forward pass
                 x, y = x.to(device), y.to(device)
                 output = model(x)
-                output[:, : 2 * task_id] = -100000000
-                output[:, 2 * task_id + 2:] = -10000000
+                cropped_output = output[:, task_id * 2:task_id * 2 + 2]
+                loss_c = loss_func(cropped_output, y - task_id * 2)
 
-                loss_c = loss_func(output, y)
-                output = torch.argmax(output, dim=1)
+                cropped_output = torch.argmax(cropped_output, dim=1)
                 loss += loss_c.detach().item()
                 total += x.shape[0]
-                correct += torch.sum(y == output).detach().item()
+                correct += torch.sum(y-task_id*2 == cropped_output).detach().item()
 
             acc = (correct / total)
             loss = loss / len(testDataloader)

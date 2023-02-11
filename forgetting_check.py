@@ -96,9 +96,8 @@ if __name__ == "__main__":
                     optimizer.zero_grad()
                     model.zero_grad()
                     output = model(x)
-                    output[:, :2*task_id]=-100000000
-                    output[:, 2*task_id+2:]=-10000000
-                    loss = loss_func(output, y)
+                    cropped_output=output[:, task_id*2:task_id*2+2]
+                    loss = loss_func(cropped_output, y-task_id*2)
                     loss.backward()
                     optimizer.step()
                     pbar.update()
