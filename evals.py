@@ -39,6 +39,8 @@ def track_model(model, epoch, step=0):
 #                 print(name)
 # %%
 def normal_eval_forgetting(model, testDataloaders, epoch, loss_func, device="cuda", log=True):
+    acces=[]
+    losses=[]
     for task_id in range(len(testDataloaders)):
         testDataloader=testDataloaders[task_id]
         with torch.no_grad():
@@ -59,11 +61,14 @@ def normal_eval_forgetting(model, testDataloaders, epoch, loss_func, device="cud
 
             acc = (correct / total)
             loss = loss / len(testDataloader)
+            acces.append(acc)
+            losses.append(loss)
             if log:
                 logwriter.log(f"performance_eval/test_loss_{task_id}", loss, epoch)
                 logwriter.log(f"performance_eval/test_accuracy_{task_id}", acc, epoch)
-            else:
-                return acc, loss
+
+    logwriter.log(f"performance_eval/test_loss_average", np.mean(np.array(losses)), epoch)
+    logwriter.log(f"performance_eval/test_accuracy_average", np.mean(np.array(acces)), epoch)
 
 
 def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True):
