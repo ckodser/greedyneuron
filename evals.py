@@ -67,8 +67,10 @@ def normal_eval_forgetting(model, testDataloaders, epoch, loss_func, device="cud
                 logwriter.log(f"performance_eval/test_loss_{task_id}", loss, epoch)
                 logwriter.log(f"performance_eval/test_accuracy_{task_id}", acc, epoch)
 
-    logwriter.log(f"performance_eval/test_loss_average", np.mean(np.array(losses)), epoch)
-    logwriter.log(f"performance_eval/test_accuracy_average", np.mean(np.array(acces)), epoch)
+    acc, loss= np.mean(np.array(acces)), np.mean(np.array(losses))
+    logwriter.log(f"performance_eval/test_loss_average", loss, epoch)
+    logwriter.log(f"performance_eval/test_accuracy_average", acc, epoch)
+    return acc, loss
 
 
 def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True):
