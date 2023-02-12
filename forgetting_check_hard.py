@@ -52,7 +52,8 @@ if __name__ == "__main__":
         "number_of_worker": args.number_of_worker,
         "noise_eps": noise_eps,
         "pgd_eps": pgd_eps,
-        "pgd_iters": iters
+        "pgd_iters": iters,
+        "task":"MNIST-Split HARD"
     }
     # datasets
 
