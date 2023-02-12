@@ -41,7 +41,7 @@ def iter_by_epoch(epoch, step):
 
 
 def log(group, value, epoch, step=None, silent=False, translate=True):
-    global previous_epoch, task_id, forgetting_setting, total_epoches
+    global previous_epoch, task_id, forgetting_setting, total_epoches, max_step
 
     if epoch > previous_epoch:
         task_id += 1
@@ -53,6 +53,7 @@ def log(group, value, epoch, step=None, silent=False, translate=True):
         iter = iter_by_epoch(epoch, step)
         if forgetting_setting:
             iter /= total_epoches
+        iter+=task_id*max_step
     else:
         iter = epoch
     if writer_mode == "tensorboard":
