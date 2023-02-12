@@ -54,11 +54,12 @@ if __name__ == "__main__":
         "pgd_eps": pgd_eps,
         "pgd_iters": iters
     }
-    start_writer(c_run_name, "wandb", config)
-    # start_writer(c_run_name, "tensorboard", config)
     # datasets
 
     trainDataloaders, testDataloaders, input_shape = datasets.get_dataloaders_forgetting(dataset_name, batch_size)
+
+    start_writer(c_run_name, "wandb", config, forgetting=True, epoches=epochs, steps=len(trainDataloaders[0]))
+    # start_writer(c_run_name, "tensorboard", config)
 
     if args.model_type == "CNN":
         model = ClassifierCNN(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
