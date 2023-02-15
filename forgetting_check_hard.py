@@ -117,5 +117,5 @@ if __name__ == "__main__":
                         track_model(model, epoch, step)
             scheduler.step()
             set_to_eval(model)
-            normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func)
+            normal_eval_forgetting_hard(model, testDataloaders, task_id, loss_func)
 
