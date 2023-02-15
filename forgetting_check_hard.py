@@ -53,7 +53,8 @@ if __name__ == "__main__":
         "noise_eps": noise_eps,
         "pgd_eps": pgd_eps,
         "pgd_iters": iters,
-        "task":"MNIST-Split HARD"
+        "task":"MNIST-Split HARD",
+        "step_counting":"task_id"
     }
     # datasets
 
