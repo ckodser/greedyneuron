@@ -46,7 +46,7 @@ def log(group, value, epoch, step=None, silent=False, translate=True):
     if epoch < previous_epoch:
         task_id += 1
     previous_epoch = epoch
-    epoch=(epoch+task_id*total_epoches)/total_epoches
+    epoch=((epoch+task_id*total_epoches)/total_epoches)*200
     if disable:
         return
     if translate:
