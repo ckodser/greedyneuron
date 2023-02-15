@@ -4,7 +4,7 @@ import wandb
 
 # Writer will output to ./runs/ directory by default
 writer = None
-max_step = 0
+max_step = 1
 writer_mode = None
 disable = False
 previous_epoch = -1
@@ -43,17 +43,14 @@ def iter_by_epoch(epoch, step):
 def log(group, value, epoch, step=None, silent=False, translate=True):
     global previous_epoch, task_id, forgetting_setting, total_epoches, max_step
 
-    if epoch > previous_epoch:
+    if epoch < previous_epoch:
         task_id += 1
     previous_epoch = epoch
-
+    epoch=epoch+task_id*total_epoches
     if disable:
         return
     if translate:
         iter = iter_by_epoch(epoch, step)
-        if forgetting_setting:
-            iter /= total_epoches
-        iter+=task_id*max_step
     else:
         iter = epoch
     if writer_mode == "tensorboard":
