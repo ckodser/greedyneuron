@@ -54,7 +54,7 @@ if __name__ == "__main__":
         "pgd_eps": pgd_eps,
         "pgd_iters": iters,
         "task":"MNIST-Split HARD",
-        "step_counting":"task_id"
+        "step_counting":"epoch*taskid"
     }
     # datasets
 
