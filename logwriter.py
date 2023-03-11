@@ -16,6 +16,8 @@ total_epoches = None
 def start_writer(name, mode="tensorboard", dict=None, forgetting=False, epoches=None, steps=None):
     if disable:
         return
+    if not forgetting:
+        steps=1
     global writer, writer_mode, forgetting_setting, total_epoches, max_step
     total_epoches = epoches
     max_step= steps
