@@ -9,7 +9,7 @@ import argparse
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_type', default='MLP', type=str,
-                        choices={'MLP', 'CNN', 'CNNWide', "LeNET"})
+                        choices={'MLP', 'CNN', 'CNNWide', "LeNET", "ClassifierCNNShit"})
     parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str,)
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal', 'intel', 'greedyExtraverts'})
     parser.add_argument('--dataset', default='MNIST', type=str, choices={'MNIST', "FashionMNIST", "cifar10", "cifar100"})
