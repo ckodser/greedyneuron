@@ -43,10 +43,12 @@ def iter_by_epoch(epoch, step):
 def log(group, value, epoch, step=None, silent=False, translate=True):
     global previous_epoch, task_id, forgetting_setting, total_epoches, max_step
 
-    if epoch < previous_epoch:
-        task_id += 1
-    previous_epoch = epoch
-    epoch=((epoch+task_id*total_epoches)/total_epoches)*200
+    if forgetting_setting:
+        if epoch < previous_epoch:
+            task_id += 1
+        previous_epoch = epoch
+        epoch=((epoch+task_id*total_epoches)/total_epoches)*200
+
     if disable:
         return
     if translate:

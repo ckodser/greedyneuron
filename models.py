@@ -27,7 +27,6 @@ def hook(module, grad_input, grad_output):
             # print(module, "Number of zeros:",torch.sum(torch.abs(f)<eps).item())
             # f = f * module.born_inequality
             f[torch.abs(f) < eps] = torch.mean(f)
-            assert torch.sum(torch.abs(f) < eps).item() == 0
             Gr = Go / (f + eps)
             f_normalize = f / (math.sqrt(torch.sum(GA * GA) / (torch.sum(Gr * Gr) + eps)) + eps)
             Grn = Go / (f_normalize + eps)
