@@ -289,6 +289,7 @@ class ClassifierCNNShit(torch.nn.Module):
             self.layers.append(GConv2d(input_feature, h, 11, 1, 0, mode, nn.Sequential(
                 nn.ReLU()), extravert_mult, extravert_bias))
             input_feature = h
+        self.layers.append(torch.nn.AvgPool2d(2))
         self.layers.append(torch.nn.Flatten(start_dim=1))
         self.layers.append(GLinear(hidden_featuer_num[-1], class_num, mode, None, extravert_mult, extravert_bias))
         self.deep = nn.Sequential(*self.layers)
