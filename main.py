@@ -111,7 +111,7 @@ if __name__ == "__main__":
         scheduler.step()
         set_to_eval(model)
         normal_eval(model, testDataloader, epoch, loss_func)
-        noise_robust_eval(model, testDataloader, epoch, loss_func, noise_eps, dataset_name)
+        # noise_robust_eval(model, testDataloader, epoch, loss_func, noise_eps, dataset_name)
 
     set_to_eval(model)
     strong_robust_eval(model, testDataloader, loss_func, pgd_eps, iters, dataset_name)
