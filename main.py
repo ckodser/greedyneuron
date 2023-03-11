@@ -9,7 +9,7 @@ import argparse
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_type', default='MLP', type=str,
-                        choices={'MLP', 'CNN', 'CNNWide', "LeNET", "ClassifierCNNShit"})
+                        choices={'MLP', 'CNN', 'CNNWide', "LeNET", "ClassifierCNNShit", "ClassifierCNNDeep"})
     parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str,)
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal', 'intel', 'greedyExtraverts'})
     parser.add_argument('--dataset', default='MNIST', type=str, choices={'MNIST', "FashionMNIST", "cifar10", "cifar100"})
@@ -65,6 +65,9 @@ if __name__ == "__main__":
         model = ClassifierCNNWide(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "ClassifierCNNShit":
         model = ClassifierCNNShit(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
+    if args.model_type == "ClassifierCNNDeep":
+        model = ClassifierCNNDeep(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
+
     if args.model_type == "MLP":
         model = ClassifierMLP(input_shape[0]*input_shape[1]*input_shape[2],hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "LeNET":
