@@ -111,6 +111,7 @@ class GreedyConv2dPlain(nn.Module):
         O = self.convGradChanger(A, input, self.weight)
         return O + self.bias.view(1, -1, 1, 1)
 
+
 class GreedyConv2dPlainExtraverts(nn.Module):
     def __init__(self, input_feature, output_feature, kernel_size, extravert_mult, extravert_bias,
                  stride, padding):
@@ -136,6 +137,7 @@ class GreedyConv2dPlainExtraverts(nn.Module):
         O = self.convGradChanger(A, input, self.weight)
         return O + self.bias.view(1, -1, 1, 1)
 
+
 class GreedyLinearPlain(nn.Module):
     def __init__(self, input_feature, output_feature):
         super().__init__()
@@ -143,6 +145,10 @@ class GreedyLinearPlain(nn.Module):
         linear = nn.Linear(input_feature, output_feature)
         self.weight = torch.nn.parameter.Parameter(data=linear.weight.clone(), requires_grad=True)
         self.bias = torch.nn.parameter.Parameter(data=linear.bias.clone(), requires_grad=True)
+        if input_feature == output_feature:
+            self.weight.data = torch.eye(self.weight.data.shape[0])
+            self.bias.data = torch.zeros_like(self.bias.data)
+
         with torch.no_grad():
             self.bias_initial_norm = torch.linalg.norm(self.bias.data)
             self.weigth_initial_norm = torch.linalg.matrix_norm(self.weight.data)
@@ -159,7 +165,7 @@ class GreedyLinearPlainExtraverts(GreedyLinearPlain):
         super(GreedyLinearPlainExtraverts, self).__init__(input_feature, output_feature)
         self.linearGradChangerExtraverts = LinearGradChangerExtraverts(output_feature)
         self.extravertish = torch.nn.parameter.Parameter(
-            data=torch.exp(torch.randn(output_feature, 1)*extravert_mult)+extravert_bias,
+            data=torch.exp(torch.randn(output_feature, 1) * extravert_mult) + extravert_bias,
             requires_grad=False)
         plt.hist(self.extravertish.numpy())
         plt.show()
@@ -196,7 +202,8 @@ class GLinear(nn.Module):
 
 
 class GConv2d(nn.Module):
-    def __init__(self, input_feature, output_feature, kernel_size, stride, padding, mode, activation, extravert_mult, extravert_bias):
+    def __init__(self, input_feature, output_feature, kernel_size, stride, padding, mode, activation, extravert_mult,
+                 extravert_bias):
         super().__init__()
         assert mode in ["greedy", "normal", "intel"]
         self.mode = mode
@@ -259,6 +266,7 @@ class ClassifierCNN(torch.nn.Module):
         x = self.deep(x)
         return x * t
 
+
 class ClassifierCNNDeep(torch.nn.Module):
     def __init__(self, input_feature, hidden_featuer_num, class_num, mode, extravert_mult, extravert_bias):
         super(ClassifierCNNDeep, self).__init__()
@@ -293,10 +301,10 @@ class ClassifierCNNWide(torch.nn.Module):
         self.layers.append(GLinear(hidden_featuer_num[-1], class_num, mode, None, extravert_mult, extravert_bias))
         self.deep = nn.Sequential(*self.layers)
 
-
     def forward(self, x, t=1):
         x = self.deep(x)
         return x * t
+
 
 class ClassifierCNNShit(torch.nn.Module):
     def __init__(self, input_feature, hidden_featuer_num, class_num, mode, extravert_mult, extravert_bias):
@@ -313,10 +321,10 @@ class ClassifierCNNShit(torch.nn.Module):
         self.layers.append(GLinear(hidden_featuer_num[-1], class_num, mode, None, extravert_mult, extravert_bias))
         self.deep = nn.Sequential(*self.layers)
 
-
     def forward(self, x, t=1):
         x = self.deep(x)
         return x * t
+
 
 def forward(self, x):
     out = self.layer1(x)
