@@ -67,7 +67,6 @@ if __name__ == "__main__":
         model = ClassifierCNNShit(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "ClassifierCNNDeep":
         model = ClassifierCNNDeep(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
-
     if args.model_type == "MLP":
         model = ClassifierMLP(input_shape[0]*input_shape[1]*input_shape[2],hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "LeNET":
