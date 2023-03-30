@@ -148,6 +148,9 @@ class GreedyLinearPlain(nn.Module):
         if input_feature == output_feature:
             self.weight.data = torch.eye(self.weight.data.shape[0])
             self.bias.data = torch.zeros_like(self.bias.data)
+        if output_feature == 10:
+            self.weight.data = torch.zeros_like(self.weight.data)
+            self.bias.data = torch.zeros_like(self.bias.data)
 
         with torch.no_grad():
             self.bias_initial_norm = torch.linalg.norm(self.bias.data)
