@@ -136,8 +136,8 @@ def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True
         if log:
             logwriter.log(f"performance_eval/{dataset_name}_loss", loss, epoch)
             logwriter.log(f"performance_eval/{dataset_name}_accuracy", acc, epoch)
-        else:
-            return acc, loss
+
+    return acc, loss
 
 
 # PGD Attack
