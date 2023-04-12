@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 from torch.nn import functional as F
 from torch import nn
 import math
+import wandb
 
 
 def norm(A):
@@ -11,39 +12,48 @@ def norm(A):
 
 
 def hook(module, grad_input, grad_output):
-    if (isinstance(module, ConvGradChanger) or isinstance(module, LinearGradChanger) or isinstance(module,
-                                                                                                   LinearGradChangerExtraverts)) and module.training is True:
+    if (isinstance(module, ConvGradChanger) or isinstance(module, LinearGradChanger) or
+        isinstance(module, LinearGradChangerExtraverts)) and module.training is True:
         eps = 1e-15
         if isinstance(module, LinearGradChangerExtraverts):
             GA, Gi, Gw, Gextra = grad_input
         else:
-            GA, Gi, Gw = grad_input
+            GA, Gi, Gw = grad_input  # gradient of A, gradient of input, gradient of weight (A=input*weight)
+        """
+        we want Gw become 0, since true gradient should follow from original path
+        """
         if norm(Gw) > eps:
+            # hook will be called multiple time, however,
+            # we only want to applied it once.
+            # we could detect if its second time by check Gw norm,
+            # since we make is zero after first time
             Go = grad_output[0]
             if isinstance(module, ConvGradChanger):
                 f = torch.sqrt(torch.sum(Gw * Gw, dim=[1, 2, 3])).view(1, -1, 1, 1)
             if isinstance(module, LinearGradChanger) or isinstance(module, LinearGradChangerExtraverts):
                 f = torch.sqrt(torch.sum(Gw * Gw, dim=[1])).view(1, -1)
-            # print(module, "Number of zeros:",torch.sum(torch.abs(f)<eps).item())
-            # f = f * module.born_inequality
-            f[torch.abs(f) < eps] = torch.mean(f)
-            Gr = Go / (f + eps)
-            f_normalize = f / (math.sqrt(torch.sum(GA * GA) / (torch.sum(Gr * Gr) + eps)) + eps)
-            Grn = Go / (f_normalize + eps)
+                """
+                f=how much each neuron update its weights
+                by assumption 2 this value for all neurons should be equal,
+                to make it a multi-agent neural network.
+                using this information we should scale gradient to make it equality between neurons.
+                """
 
-            # GAN = torch.sum(GA * GA).item()
-            # GrnN = torch.sum(Grn * Grn).item()
-            # diff = GAN - GrnN
-            # # print(diff, GAN, "=>", GrnN, norm(Gw).item(), Gw.shape)
-            # try:
-            #     assert abs(diff) < abs(GAN / 1000)
-            # except:
-            #     print(module, diff, GAN, GrnN)
-            #     assert abs(diff) < abs(GAN / 1000)
+            f[torch.abs(f) < eps] = torch.mean(f)
+            module.plot_f(f)
+            # if gradients are zero(f=0), then no matter how much we scale
+            # this neuron is still not going to change its input
+            # results in a numerical instability
+            Gr = Go / (f + eps)
+            f_normalize = f / (
+                        2 * math.sqrt(torch.sum(GA * GA) / (torch.sum(Gr * Gr) + eps)) + eps)  # TODO: 2 or not 2?
+            Grn = Go / (f_normalize + eps)
+            # Gr and Grn are same but they differ only by a scaler,
+            # we want to keep norm of gradients similar to error-backpropagation
             if isinstance(module, LinearGradChangerExtraverts):
                 return (Grn, torch.zeros_like(Gi), torch.zeros_like(Gw), torch.zeros_like(Gextra))
             else:
-                return (Grn, torch.zeros_like(Gi), torch.zeros_like(Gw))
+                return (Grn, torch.zeros_like(Gi), torch.zeros_like(Gw))  # GA->Grn, Gi->0, Gw->0
 
 
 class ConvGradChanger(nn.Module):
@@ -51,6 +61,11 @@ class ConvGradChanger(nn.Module):
         super(ConvGradChanger, self).__init__()
         self.stride = stride
         self.padding = padding
+        self.tracking = False
+
+    def plot_f(self, f):
+        if self.tracking:
+            raise NotImplementedError
 
     def forward(self, A, input, weight):
         B = F.conv2d(input, weight, torch.zeros(weight.shape[0], device=weight.device),
@@ -60,10 +75,25 @@ class ConvGradChanger(nn.Module):
 
 class LinearGradChanger(nn.Module):
     def __init__(self):
+        """ we use this module to
+         add a backward hook on top of it,
+         to be able to change gradients in backward pass
+        """
         super(LinearGradChanger, self).__init__()
+        self.tracking = False
+        self.name = None
+
+    def plot_f(self, f):
+        if self.tracking:
+            c = 1 / f
+            # c tracking
+            score = torch.flatten(c)
+            data = [[score[i]] for i in range(score.shape[0])]
+            table = wandb.Table(data=data, columns=["utility"])
+            wandb.log({f"c_tracking/w_{self.name}": wandb.plot.histogram(table, "value", title="c_tracking"), })
 
     def forward(self, A, input, weight):
-        B = F.linear(input, weight, torch.zeros(weight.shape[0], device=weight.device))
+        B = F.linear(input, weight, torch.zeros(weight.shape[0], device=weight.device))  # in value B=A so (A+B)/2=A=B
         return (A + B) / 2
 
 
@@ -139,27 +169,39 @@ class GreedyConv2dPlainExtraverts(nn.Module):
 
 
 class GreedyLinearPlain(nn.Module):
-    def __init__(self, input_feature, output_feature):
+    def __init__(self, input_feature, output_feature, residual_initialization=False):
+        """
+        A linear layer follows the theories in the paper. (each neuron act as rational
+        agent trying to maximize its utility).
+
+        :param input_feature: number of input features
+        :param output_feature: number of output features
+        :param residual_initialization: if true, bias = zero, weight = eye at initialization.
+         it simulates a residual connection
+        """
         super().__init__()
 
         linear = nn.Linear(input_feature, output_feature)
         self.weight = torch.nn.parameter.Parameter(data=linear.weight.clone(), requires_grad=True)
         self.bias = torch.nn.parameter.Parameter(data=linear.bias.clone(), requires_grad=True)
-        if input_feature == output_feature:
-            self.weight.data = torch.eye(self.weight.data.shape[0])
-            self.bias.data = torch.zeros_like(self.bias.data)
-        if output_feature == 10:
-            self.weight.data = torch.zeros_like(self.weight.data)
-            self.bias.data = torch.zeros_like(self.bias.data)
+        if residual_initialization:
+            if input_feature == output_feature:
+                self.weight.data = torch.eye(self.weight.data.shape[0])
+                self.bias.data = torch.zeros_like(self.bias.data)
+            if output_feature == 10:
+                self.weight.data = torch.zeros_like(self.weight.data)
+                self.bias.data = torch.zeros_like(self.bias.data)
 
+        # for tracking
         with torch.no_grad():
             self.bias_initial_norm = torch.linalg.norm(self.bias.data)
             self.weigth_initial_norm = torch.linalg.matrix_norm(self.weight.data)
+
         self.linearGradChanger = LinearGradChanger()
 
     def forward(self, input):
         A = F.linear(input, self.weight, torch.zeros(self.weight.shape[0], device=self.weight.device), )
-        O = self.linearGradChanger(A, input, self.weight)
+        O = self.linearGradChanger(A, input, self.weight)  # in value O is equal to A, however its grads are different
         return O + self.bias.view(1, -1)
 
 
@@ -181,6 +223,15 @@ class GreedyLinearPlainExtraverts(GreedyLinearPlain):
 
 class GLinear(nn.Module):
     def __init__(self, input_size, output_size, mode, activation, extravert_mult=1, extravert_bias=0):
+        """
+        A linear Module
+        :param input_size: input features
+        :param output_size:  output features
+        :param mode: normal, greedy, greedyExtraverts, intel
+        :param activation: an optional activation applied after linear function
+        :param extravert_mult: used for greedyExtraverts
+        :param extravert_bias: used for greedyExtraverts
+        """
         super().__init__()
         self.mode = mode
         self.activation = activation
@@ -234,6 +285,14 @@ class GConv2d(nn.Module):
 
 # model
 class ClassifierMLP(torch.nn.Module):
+    """ Simple MLP model
+    input_feature: number of input feature
+    hidden_layer_size: a list of units in hidden layer
+    class_num: number of classes
+    mode: normal, greedy, greedyExtraverts, intel
+    extravert_mult, extravert_bias: used when mode is greedyExtraverts
+    """
+
     def __init__(self, input_feature, hidden_layer_size, class_num, mode, extravert_mult, extravert_bias):
         super(ClassifierMLP, self).__init__()
         self.layers = []
@@ -342,6 +401,10 @@ def forward(self, x):
 
 
 class LeNet(torch.nn.Module):
+    """
+    LeNet model
+    """
+
     def __init__(self, num_classes, mode):
         super(LeNet, self).__init__()
         self.layer1 = nn.Sequential(
@@ -371,3 +434,20 @@ def set_to_eval(model):
 
 def set_to_train(model):
     model.train()
+
+
+def set_c_tracking(model, value):
+    for name, module in model.named_children():
+        if isinstance(module, LinearGradChanger) or isinstance(module, ConvGradChanger):
+            module.tracking = value
+            print(name, " -> ", value)
+        else:
+            set_c_tracking(module, value)
+
+
+def set_name(model, prefix=""):
+    for name, module in model.named_children():
+        if isinstance(module, LinearGradChanger) or isinstance(module, ConvGradChanger):
+            module.name = prefix
+        else:
+            set_name(module, prefix=prefix + "." + name)

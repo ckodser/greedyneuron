@@ -12,6 +12,8 @@ task_id = 0
 forgetting_setting = False
 total_epoches = None
 
+def finsih():
+    wandb.finish(exit_code=0)
 
 def start_writer(name, mode="tensorboard", dict=None, forgetting=False, epoches=None, steps=None):
     if disable:
@@ -28,7 +30,7 @@ def start_writer(name, mode="tensorboard", dict=None, forgetting=False, epoches=
     else:
         import wandb
         runwandb = wandb.init(
-            project="greedyNeuron2",
+            project="greedyNeuron3",
             name=name,
             config=dict)
 

@@ -5,7 +5,7 @@ import torch.nn as nn
 import numpy as np
 import torch
 import logwriter
-
+import wandb
 
 def norm(A):
     return torch.sum(A * A)
@@ -31,6 +31,15 @@ def track_model(model, epoch, step=0):
         try:
             logwriter.log(f"track_model/w_{name}_norm2", norm(param.data), epoch, step, silent=True)
             logwriter.log(f"track_model/grad_{name}_norm2", norm(param.grad), epoch, step, silent=True)
+
+            # score
+            score=torch.flatten(torch.sum(param.data*param.data, sum=1))
+            data = [[score[i]] for i in range(score.shape[0])]
+            table = wandb.Table(data=data, columns=["utility"])
+            wandb.log({f"utility_distribution/w_{name}": wandb.plot.histogram(table, "utility",
+           title="utility_distribution"), 'epoch': epoch, 'batch': step})
+            logwriter.log(f"track_model/w_{name}_norm2", norm(param.data), epoch, step, silent=True)
+
             checkOK(name, param.grad, epoch, step)
         except:
             pass
@@ -107,7 +116,7 @@ def normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, device
     return acc, loss
 
 
-def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True):
+def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True, dataset_name="validation"):
     with torch.no_grad():
         correct = 0
         total = 0
@@ -125,8 +134,8 @@ def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True
         acc = (correct / total)
         loss = loss / len(testDataloader)
         if log:
-            logwriter.log("performance_eval/test_loss", loss, epoch)
-            logwriter.log("performance_eval/test_accuracy", acc, epoch)
+            logwriter.log(f"performance_eval/{dataset_name}_loss", loss, epoch)
+            logwriter.log(f"performance_eval/{dataset_name}_accuracy", acc, epoch)
         else:
             return acc, loss
 

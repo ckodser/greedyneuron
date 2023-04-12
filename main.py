@@ -1,4 +1,5 @@
 from tqdm import tqdm
+import logwriter
 from models import *
 from evals import *
 from logwriter import *
@@ -10,9 +11,10 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_type', default='MLP', type=str,
                         choices={'MLP', 'CNN', 'CNNWide', "LeNET", "ClassifierCNNShit", "ClassifierCNNDeep"})
-    parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str,)
+    parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str, )
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal', 'intel', 'greedyExtraverts'})
-    parser.add_argument('--dataset', default='MNIST', type=str, choices={'MNIST', "FashionMNIST", "cifar10", "cifar100"})
+    parser.add_argument('--dataset', default='MNIST', type=str,
+                        choices={'MNIST', "FashionMNIST", "cifar10", "cifar100"})
     parser.add_argument('--learning_rate', default=0.052, type=float)
     parser.add_argument('--batch_size', default=512, type=int)
     parser.add_argument('--number_of_worker', default=1, type=int)
@@ -20,7 +22,7 @@ def get_args():
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--run_name', default='newLinear', type=str)
     parser.add_argument('--extravert_bias', default=0, type=float)
-    parser.add_argument('--extravert_mult', default=1/2, type=float)
+    parser.add_argument('--extravert_mult', default=1 / 2, type=float)
     return parser.parse_args()
 
 
@@ -35,7 +37,6 @@ if __name__ == "__main__":
     hidden_layers = list(map(int, args.model_layers.split(",")))
     mode = args.mode
     c_run_name = f"{args.run_name}_{dataset_name}_MODE{mode}_MODEL_{args.model_type}_{str(hidden_layers)[1:-1]}_BS{batch_size}_LR{lr}_E{epochs}_{args.extravert_mult}{args.extravert_bias}"
-
 
     print(c_run_name)
     run = args.run_name
@@ -52,23 +53,29 @@ if __name__ == "__main__":
         "number_of_worker": args.number_of_worker,
         "noise_eps": noise_eps,
         "pgd_eps": pgd_eps,
-        "pgd_iters": iters
+        "pgd_iters": iters,
     }
     start_writer(c_run_name, "wandb", config)
     # start_writer(c_run_name, "tensorboard", config)
     # datasets
-    trainDataloader, testDataloader, input_shape = datasets.get_dataloaders(dataset_name, batch_size)
+    trainDataloader, valDataloader, testDataloader, input_shape = datasets.get_dataloaders(dataset_name, batch_size,
+                                                                                           args.seed)
 
     if args.model_type == "CNN":
-        model = ClassifierCNN(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
+        model = ClassifierCNN(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(
+            device)
     if args.model_type == "CNNWide":
-        model = ClassifierCNNWide(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
+        model = ClassifierCNNWide(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(
+            device)
     if args.model_type == "ClassifierCNNShit":
-        model = ClassifierCNNShit(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
+        model = ClassifierCNNShit(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(
+            device)
     if args.model_type == "ClassifierCNNDeep":
-        model = ClassifierCNNDeep(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
+        model = ClassifierCNNDeep(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(
+            device)
     if args.model_type == "MLP":
-        model = ClassifierMLP(input_shape[0]*input_shape[1]*input_shape[2],hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(device)
+        model = ClassifierMLP(input_shape[0] * input_shape[1] * input_shape[2], hidden_layers, 10, mode,
+                              args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "LeNET":
         model = LeNet(10, mode).to(device)
     loss_func = torch.nn.CrossEntropyLoss()
@@ -82,13 +89,14 @@ if __name__ == "__main__":
     print(model)
     optimizer = torch.optim.SGD(params=model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, epochs // 2, gamma=0.1)
-
+    set_name(model)
     epoch = 0
     for epoch in range(0, epochs):
         set_to_train(model)
         logwriter.log("training_monitor/learning_rate", scheduler.get_last_lr()[0], epoch)
         avgloss = 0
         with tqdm(total=len(trainDataloader), position=0, leave=False) as pbar:
+            set_c_tracking(model, True)
             for step, (x, y) in enumerate(trainDataloader):
                 # forward pass
                 x, y = x.to(device), y.to(device)
@@ -111,13 +119,14 @@ if __name__ == "__main__":
 
                 if step == 0:
                     print("TRACK MODEL")
+                    set_c_tracking(model, False)
                     track_model(model, epoch, step)
+
         scheduler.step()
         set_to_eval(model)
-        normal_eval(model, testDataloader, epoch, loss_func)
-        # noise_robust_eval(model, testDataloader, epoch, loss_func, noise_eps, dataset_name)
+        acc, loss = normal_eval(model, valDataloader, epoch, loss_func)
 
     set_to_eval(model)
-    strong_robust_eval(model, testDataloader, loss_func, pgd_eps, iters, dataset_name)
-    strong_sparse_eval(model, testDataloader, loss_func)
-    # torch.save(model.state_dict(), f"checkpoints/{c_run_name}/last.pth")
+    acc, loss = normal_eval(model, valDataloader, epoch, loss_func)
+    acc, loss = normal_eval(model, valDataloader, epoch, loss_func, dataset_name="test")
+    logwriter.finsih()
