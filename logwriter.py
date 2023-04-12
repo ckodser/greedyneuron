@@ -30,7 +30,7 @@ def start_writer(name, mode="tensorboard", dict=None, forgetting=False, epoches=
     else:
         import wandb
         runwandb = wandb.init(
-            project="greedyNeuron4",
+            project="greedyNeuron5",
             name=name,
             config=dict)
 

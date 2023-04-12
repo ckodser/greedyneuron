@@ -33,7 +33,7 @@ def track_model(model, epoch, step=0):
             logwriter.log(f"track_model/grad_{name}_norm2", norm(param.grad), epoch, step, silent=True)
 
             # score
-            score=torch.flatten(torch.sum(param.data*param.data, sum=1))
+            score=torch.flatten(torch.sum(param.data*param.data, dim=1))
             data = [[score[i]] for i in range(score.shape[0])]
             table = wandb.Table(data=data, columns=["utility"])
             wandb.log({f"utility_distribution/w_{name}": wandb.plot.histogram(table, "utility",
