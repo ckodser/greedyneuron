@@ -46,7 +46,7 @@ def hook(module, grad_input, grad_output):
             # results in a numerical instability
             Gr = Go / (f + eps)
             f_normalize = f / (
-                        2 * math.sqrt(torch.sum(GA * GA) / (torch.sum(Gr * Gr) + eps)) + eps)  # TODO: 2 or not 2?
+                         math.sqrt(torch.sum(GA * GA) / (torch.sum(Gr * Gr) + eps)) + eps)  # TODO: 2 or not 2?
             Grn = Go / (f_normalize + eps)
             # Gr and Grn are same but they differ only by a scaler,
             # we want to keep norm of gradients similar to error-backpropagation
