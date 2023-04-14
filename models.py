@@ -62,10 +62,16 @@ class ConvGradChanger(nn.Module):
         self.stride = stride
         self.padding = padding
         self.tracking = False
+        self.name=None
 
     def plot_f(self, f):
         if self.tracking:
-            raise NotImplementedError
+            c = 1 / f
+            # c tracking
+            score = torch.flatten(c)
+            data = [[score[i]] for i in range(score.shape[0])]
+            table = wandb.Table(data=data, columns=["utility"])
+            wandb.log({f"c_tracking/w_{self.name}": wandb.plot.histogram(table, "value", title="c_tracking"), })
 
     def forward(self, A, input, weight):
         B = F.conv2d(input, weight, torch.zeros(weight.shape[0], device=weight.device),
