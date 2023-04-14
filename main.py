@@ -20,7 +20,7 @@ def get_args():
     parser.add_argument('--number_of_worker', default=1, type=int)
     parser.add_argument('--num_epochs', default=25, type=int)
     parser.add_argument('--seed', default=0, type=int)
-    parser.add_argument('--run_name', default='not2', type=str)
+    parser.add_argument('--run_name', default='with2', type=str)
     parser.add_argument('--extravert_bias', default=0, type=float)
     parser.add_argument('--extravert_mult', default=1 / 2, type=float)
     return parser.parse_args()
