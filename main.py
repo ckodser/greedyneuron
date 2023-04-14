@@ -9,18 +9,18 @@ import argparse
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_type', default='MLP', type=str,
+    parser.add_argument('--model_type', default='LeNET', type=str,
                         choices={'MLP', 'CNN', 'CNNWide', "LeNET", "ClassifierCNNShit", "ClassifierCNNDeep"})
     parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str, )
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal', 'intel', 'greedyExtraverts'})
-    parser.add_argument('--dataset', default='MNIST', type=str,
+    parser.add_argument('--dataset', default='cifar10', type=str,
                         choices={'MNIST', "FashionMNIST", "cifar10", "cifar100"})
     parser.add_argument('--learning_rate', default=0.052, type=float)
     parser.add_argument('--batch_size', default=512, type=int)
     parser.add_argument('--number_of_worker', default=1, type=int)
     parser.add_argument('--num_epochs', default=25, type=int)
     parser.add_argument('--seed', default=0, type=int)
-    parser.add_argument('--run_name', default='with2', type=str)
+    parser.add_argument('--run_name', default='not2', type=str)
     parser.add_argument('--extravert_bias', default=0, type=float)
     parser.add_argument('--extravert_mult', default=1 / 2, type=float)
     return parser.parse_args()
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         model = ClassifierMLP(input_shape[0] * input_shape[1] * input_shape[2], hidden_layers, 10, mode,
                               args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "LeNET":
-        model = LeNet(10, mode).to(device)
+        model = LeNet(10, mode, input_shape[0],args.extravert_mult, args.extravert_bias).to(device)
     loss_func = torch.nn.CrossEntropyLoss()
     for y in model.state_dict():
         print(y, model.state_dict()[y].shape)

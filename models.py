@@ -46,7 +46,7 @@ def hook(module, grad_input, grad_output):
             # results in a numerical instability
             Gr = Go / (f + eps)
             f_normalize = f / (
-                         2*math.sqrt(torch.sum(GA * GA) / (torch.sum(Gr * Gr) + eps)) + eps)  # TODO: 2 or not 2?
+                    math.sqrt(torch.sum(GA * GA) / (torch.sum(Gr * Gr) + eps)) + eps)
             Grn = Go / (f_normalize + eps)
             # Gr and Grn are same but they differ only by a scaler,
             # we want to keep norm of gradients similar to error-backpropagation
@@ -405,17 +405,23 @@ class LeNet(torch.nn.Module):
     LeNet model
     """
 
-    def __init__(self, num_classes, mode):
+    def __init__(self, num_classes, mode, input_channels, extravert_mult, extravert_bias):
         super(LeNet, self).__init__()
         self.layer1 = nn.Sequential(
-            GConv2d(1, 6, kernel_size=5, stride=1, padding=0, mode=mode, activation=nn.ReLU()),
+            GConv2d(input_channels, 6, kernel_size=5, stride=1, padding=0, mode=mode, activation=nn.ReLU(),
+                    extravert_mult=extravert_mult, extravert_bias=extravert_bias),
             nn.MaxPool2d(kernel_size=2, stride=2))
         self.layer2 = nn.Sequential(
-            GConv2d(6, 16, kernel_size=5, stride=1, padding=0, mode=mode, activation=nn.ReLU()),
+            GConv2d(6, 16, kernel_size=5, stride=1, padding=0, mode=mode, activation=nn.ReLU(),
+                    extravert_mult=extravert_mult, extravert_bias=extravert_bias),
             nn.MaxPool2d(kernel_size=2, stride=2))
-        self.fc = GLinear(256, 120, mode=mode, activation=nn.ReLU())
-        self.fc1 = GLinear(120, 84, mode=mode, activation=nn.ReLU())
-        self.fc2 = GLinear(84, num_classes, mode=mode, activation=None)
+        features = 256 if input_channels == 1 else 400
+        self.fc = GLinear(features, 120, mode=mode, activation=nn.ReLU(),
+                          extravert_mult=extravert_mult, extravert_bias=extravert_bias)
+        self.fc1 = GLinear(120, 84, mode=mode, activation=nn.ReLU(),
+                           extravert_mult=extravert_mult, extravert_bias=extravert_bias)
+        self.fc2 = GLinear(84, num_classes, mode=mode, activation=None,
+                           extravert_mult=extravert_mult, extravert_bias=extravert_bias)
 
     def forward(self, x, t=1):
         out = self.layer1(x)
