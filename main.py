@@ -77,7 +77,7 @@ if __name__ == "__main__":
         model = ClassifierMLP(input_shape[0] * input_shape[1] * input_shape[2], hidden_layers, 10, mode,
                               args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "LeNET":
-        model = LeNet(10, mode, input_shape[0],args.extravert_mult, args.extravert_bias).to(device)
+        model = LeNet(10, mode, input_shape[0], args.extravert_mult, args.extravert_bias).to(device)
     loss_func = torch.nn.CrossEntropyLoss()
     for y in model.state_dict():
         print(y, model.state_dict()[y].shape)
@@ -91,6 +91,8 @@ if __name__ == "__main__":
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, epochs // 2, gamma=0.1)
     set_name(model)
     epoch = 0
+    best_model = model.state_dict()
+    best_acc = 0
     for epoch in range(0, epochs):
         set_to_train(model)
         logwriter.log("training_monitor/learning_rate", scheduler.get_last_lr()[0], epoch)
@@ -125,8 +127,12 @@ if __name__ == "__main__":
         scheduler.step()
         set_to_eval(model)
         acc, loss = normal_eval(model, valDataloader, epoch, loss_func)
-
+        if acc > best_acc:
+            best_model = model.state_dict()
+            best_acc = acc
     set_to_eval(model)
     acc, loss = normal_eval(model, valDataloader, epoch, loss_func)
-    acc, loss = normal_eval(model, valDataloader, epoch, loss_func, dataset_name="test")
+    acc, loss = normal_eval(model, testDataloader, epoch, loss_func, dataset_name="test")
+    model.load_state_dict(best_model)
+    acc, loss = normal_eval(model, testDataloader, epoch, loss_func, dataset_name="best_test")
     logwriter.finsih()
