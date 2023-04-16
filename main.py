@@ -1,3 +1,4 @@
+import torch
 from tqdm import tqdm
 import logwriter
 from models import *
@@ -60,6 +61,8 @@ if __name__ == "__main__":
     # datasets
     trainDataloader, valDataloader, testDataloader, input_shape = datasets.get_dataloaders(dataset_name, batch_size,
                                                                                            args.seed)
+
+    torch.manual_seed(args.seed)
 
     if args.model_type == "CNN":
         model = ClassifierCNN(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(
