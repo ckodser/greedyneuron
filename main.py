@@ -91,7 +91,9 @@ if __name__ == "__main__":
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, epochs // 2, gamma=0.1)
     set_name(model)
     epoch = 0
-    best_model = model.state_dict()
+    best_model = {}
+    for key in model.state_dict():
+        best_model[key] = model.state_dict()[key].clone()
     best_acc = 0
     for epoch in range(0, epochs):
         set_to_train(model)
@@ -128,7 +130,9 @@ if __name__ == "__main__":
         set_to_eval(model)
         acc, loss = normal_eval(model, valDataloader, epoch, loss_func)
         if acc > best_acc:
-            best_model = model.state_dict()
+            best_model = {}
+            for key in model.state_dict():
+                best_model[key] = model.state_dict()[key].clone()
             best_acc = acc
     set_to_eval(model)
     acc, loss = normal_eval(model, valDataloader, epoch, loss_func)
