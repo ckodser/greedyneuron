@@ -89,6 +89,7 @@ if __name__ == "__main__":
         torch.nn.modules.module.register_module_full_backward_hook(hook)
     print(model)
 
+    best_acc=0
     best_model = {}
     for key in model.state_dict():
         best_model[key] = model.state_dict()[key].clone()
