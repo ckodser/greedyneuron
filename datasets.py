@@ -80,6 +80,7 @@ def get_subset(dataset, labels):
     idx = np.in1d(dataset.targets, labels)
     splited_dataset = copy.deepcopy(dataset)
     splited_dataset.targets = splited_dataset.targets[idx]
+    splited_dataset.targets = (splited_dataset.targets != labels[0])
     splited_dataset.data = splited_dataset.data[idx]
     for i, (x, y) in enumerate(splited_dataset):
         plt.imshow(x[0])
@@ -90,7 +91,7 @@ def get_subset(dataset, labels):
     return splited_dataset
 
 
-def get_dataloaders_forgetting(dataset_name, batch_size):
+def get_dataloaders_forgetting(dataset_name, batch_size, seed):
     mean = {
         'MNIST': np.array([0.1307]),
         'FashionMNIST': np.array([0.2859]),
@@ -127,10 +128,26 @@ def get_dataloaders_forgetting(dataset_name, batch_size):
     test_transform = transforms.Compose(default_transform)
     # build data sets
     trainDataset = dataset_class(root="./data", train=True, transform=train_transform, download=True)
+    valDataset = dataset_class(root="./data", train=True, transform=test_transform, download=True)
     testDataset = dataset_class(root="./data", train=False, transform=test_transform, download=True)
 
-    testDatasetTasks = [get_subset(testDataset, [2 * i, 2 * i + 1]) for i in range(5)]
-    trainDatasetTasks = [get_subset(trainDataset, [2 * i, 2 * i + 1]) for i in range(5)]
+    # split data between train and val
+    num_train = len(trainDataset)
+    indices = list(range(num_train))
+    split = int(np.floor(0.2 * num_train))
+    np.random.seed(seed)
+    np.random.shuffle(indices)
+    task_permutation =[i for i in range(10)]
+    np.random.shuffle(task_permutation)
+
+    train_idx, valid_idx = indices[split:], indices[:split]
+    trainDataset = torch.utils.data.Subset(trainDataset, train_idx)
+    valDataset = torch.utils.data.Subset(valDataset, valid_idx)
+
+    testDatasetTasks = [get_subset(testDataset, task_permutation[2 * i:2 *i +2]) for i in range(5)]
+    trainDatasetTasks = [get_subset(trainDataset, task_permutation[2 * i:2 *i +2]) for i in range(5)]
+    valDatasetTasks = [get_subset(valDataset, task_permutation[2 * i:2 *i +2]) for i in range(5)]
+
     # build data loaders
     trainDataloader = [DataLoader(trainDatasetTasks[i],
                                   batch_size=batch_size, num_workers=1, sampler=None, shuffle=True, pin_memory=True) for
@@ -139,5 +156,13 @@ def get_dataloaders_forgetting(dataset_name, batch_size):
     testDataloader = [DataLoader(testDatasetTasks[i],
                                  batch_size=batch_size, num_workers=1, sampler=None, shuffle=True, pin_memory=True) for
                       i in range(5)]
+    valDataloader =[DataLoader(valDatasetTasks[i],
+                                 batch_size=batch_size, num_workers=1, sampler=None, shuffle=True, pin_memory=True) for
+                      i in range(5)]
+    return trainDataloader, valDataloader, testDataloader, input_shape[dataset_name]
 
-    return trainDataloader, testDataloader, input_shape[dataset_name]
+
+
+
+
+

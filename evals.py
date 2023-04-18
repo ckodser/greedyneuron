@@ -82,7 +82,7 @@ def normal_eval_forgetting(model, testDataloaders, epoch, loss_func, device="cud
     return acc, loss
 
 
-def normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, device="cuda", log=True):
+def normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, device="cuda", log=True, name=""):
     acces=[]
     losses=[]
     for task_id in range(len(testDataloaders)):
@@ -95,24 +95,24 @@ def normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, device
                 # forward pass
                 x, y = x.to(device), y.to(device)
                 output = model(x)
-                loss_c = loss_func(output, y - task_id * 2)
+                loss_c = loss_func(output, y)
 
                 output = torch.argmax(output, dim=1)
                 loss += loss_c.detach().item()
                 total += x.shape[0]
-                correct += torch.sum(y-task_id*2 == output).detach().item()
+                correct += torch.sum(y== output).detach().item()
 
             acc = (correct / total)
             loss = loss / len(testDataloader)
             acces.append(acc)
             losses.append(loss)
             if log:
-                logwriter.log(f"performance_eval/test_loss_{task_id}", loss, epoch)
-                logwriter.log(f"performance_eval/test_accuracy_{task_id}", acc, epoch)
+                logwriter.log(f"performance_eval/{name}_loss_{task_id}", loss, epoch)
+                logwriter.log(f"performance_eval/{name}_accuracy_{task_id}", acc, epoch)
 
     acc, loss= np.mean(np.array(acces)), np.mean(np.array(losses))
-    logwriter.log(f"performance_eval/test_loss_average", loss, epoch)
-    logwriter.log(f"performance_eval/test_accuracy_average", acc, epoch)
+    logwriter.log(f"performance_eval/{name}_loss_average", loss, epoch)
+    logwriter.log(f"performance_eval/{name}_accuracy_average", acc, epoch)
     return acc, loss
 
 

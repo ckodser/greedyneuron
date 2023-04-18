@@ -58,7 +58,7 @@ if __name__ == "__main__":
     }
     # datasets
 
-    trainDataloaders, testDataloaders, input_shape = datasets.get_dataloaders_forgetting(dataset_name, batch_size)
+    trainDataloaders, valDataloaders, testDataloaders, input_shape = datasets.get_dataloaders_forgetting(dataset_name, batch_size, seed=args.seed)
 
     start_writer(c_run_name, "wandb", config, forgetting=True, epoches=epochs, steps=len(trainDataloaders[0]))
     # start_writer(c_run_name, "tensorboard", config)
@@ -70,13 +70,13 @@ if __name__ == "__main__":
     if args.model_type == "MLP":
         model = ClassifierMLP(input_shape[0]*input_shape[1]*input_shape[2],hidden_layers, 2, mode, args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "LeNET":
-        model = LeNet(2, mode).to(device)
+        model = LeNet(2, mode, input_shape[0], args.extravert_mult, args.extravert_bias).to(device)
     loss_func = torch.nn.CrossEntropyLoss()
     for y in model.state_dict():
         print(y, model.state_dict()[y].shape)
     set_to_eval(model)
-    normal_eval_forgetting_hard(model, testDataloaders, -1, loss_func)
-
+    normal_eval_forgetting_hard(model, valDataloaders, -1, loss_func, name="val")
+    normal_eval_forgetting_hard(model, testDataloaders, -1, loss_func, name="test")
     if "greedy" in mode:
         torch.nn.modules.module.register_module_full_backward_hook(hook)
     print(model)
@@ -99,7 +99,7 @@ if __name__ == "__main__":
                     optimizer.zero_grad()
                     model.zero_grad()
                     output = model(x)
-                    loss = loss_func(output, y-task_id*2)
+                    loss = loss_func(output, y)
                     loss.backward()
                     optimizer.step()
                     pbar.update()
@@ -118,5 +118,6 @@ if __name__ == "__main__":
                         track_model(model, epoch, step)
             scheduler.step()
             set_to_eval(model)
-            normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func)
-
+            normal_eval_forgetting_hard(model, valDataloaders, epoch, loss_func, name="val")
+            normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, name="test")
+        normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, name="final_test")
