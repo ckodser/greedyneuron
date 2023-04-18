@@ -143,8 +143,10 @@ def get_dataloaders_forgetting(dataset_name, batch_size, seed):
     train_idx, valid_idx = indices[split:], indices[:split]
     trainDataset = torch.utils.data.Subset(trainDataset_inner, train_idx)
     trainDataset.targets = trainDataset_inner.targets[train_idx]
+    trainDataset.data = trainDataset_inner.data[train_idx]
     valDataset = torch.utils.data.Subset(valDataset_inner, valid_idx)
     valDataset.targets=valDataset_inner.targets[valid_idx]
+    valDataset.data = valDataset_inner.data[valid_idx]
 
     testDatasetTasks = [get_subset(testDataset, task_permutation[2 * i:2 * i + 2]) for i in range(5)]
     trainDatasetTasks = [get_subset(trainDataset, task_permutation[2 * i:2 * i + 2]) for i in range(5)]
