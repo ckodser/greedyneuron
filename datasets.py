@@ -76,8 +76,9 @@ def get_dataloaders(dataset_name, batch_size, seed):
     return trainDataloader, valDataloader, testDataloader, input_shape[dataset_name]
 
 
-def get_subset(dataset, labels):
+def get_subset(dataset, labels, index):
     idx = np.in1d(dataset.targets, labels)
+    idx = np.array([id for id in idx if idx in index])
     splited_dataset = copy.deepcopy(dataset)
     splited_dataset.targets = splited_dataset.targets[idx]
     splited_dataset.targets = (splited_dataset.targets != labels[0])
@@ -127,8 +128,8 @@ def get_dataloaders_forgetting(dataset_name, batch_size, seed):
     train_transform = transforms.Compose(train_transforms[dataset_name] + default_transform)
     test_transform = transforms.Compose(default_transform)
     # build data sets
-    trainDataset_inner = dataset_class(root="./data", train=True, transform=train_transform, download=True)
-    valDataset_inner = dataset_class(root="./data", train=True, transform=test_transform, download=True)
+    trainDataset = dataset_class(root="./data", train=True, transform=train_transform, download=True)
+    valDataset = dataset_class(root="./data", train=True, transform=test_transform, download=True)
     testDataset = dataset_class(root="./data", train=False, transform=test_transform, download=True)
 
     # split data between train and val
@@ -141,12 +142,10 @@ def get_dataloaders_forgetting(dataset_name, batch_size, seed):
     np.random.shuffle(task_permutation)
 
     train_idx, valid_idx = indices[split:], indices[:split]
-    trainDataset = torch.utils.data.Subset(trainDataset_inner, train_idx)
-    trainDataset.targets = trainDataset_inner.targets[train_idx]
-    trainDataset.data = trainDataset_inner.data[train_idx]
-    valDataset = torch.utils.data.Subset(valDataset_inner, valid_idx)
-    valDataset.targets=valDataset_inner.targets[valid_idx]
-    valDataset.data = valDataset_inner.data[valid_idx]
+    trainDataset.targets = trainDataset.targets[train_idx]
+    trainDataset.data = trainDataset.data[train_idx]
+    valDataset.targets = valDataset.targets[valid_idx]
+    valDataset.data = valDataset.data[valid_idx]
 
     testDatasetTasks = [get_subset(testDataset, task_permutation[2 * i:2 * i + 2]) for i in range(5)]
     trainDatasetTasks = [get_subset(trainDataset, task_permutation[2 * i:2 * i + 2]) for i in range(5)]
