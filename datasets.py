@@ -133,7 +133,7 @@ def get_dataloaders_forgetting(dataset_name, batch_size, seed):
     testDataset = dataset_class(root="./data", train=False, transform=test_transform, download=True)
 
     # split data between train and val
-    num_train = len(trainDataset_inner)
+    num_train = len(trainDataset)
     indices = list(range(num_train))
     split = int(np.floor(0.2 * num_train))
     np.random.seed(seed)
