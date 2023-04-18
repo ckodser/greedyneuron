@@ -59,7 +59,15 @@ if __name__ == "__main__":
     # datasets
 
     trainDataloaders, valDataloaders, testDataloaders, input_shape = datasets.get_dataloaders_forgetting(dataset_name, batch_size, seed=args.seed)
-
+    for i, (x,y) in enumerate(trainDataloaders[0]):
+        print(y[0:7])
+        break
+    for i, (x,y) in enumerate(valDataloaders[0]):
+        print(y[0:7])
+        break
+    for i, (x,y) in enumerate(testDataloaders[0]):
+        print(y[0:7])
+        break
     start_writer(c_run_name, "wandb", config, forgetting=True, epoches=epochs, steps=len(trainDataloaders[0]))
     # start_writer(c_run_name, "tensorboard", config)
 
@@ -121,3 +129,104 @@ if __name__ == "__main__":
             normal_eval_forgetting_hard(model, valDataloaders, epoch, loss_func, name="val")
             normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, name="test")
         normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, name="final_test")
+
+
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.05 --batch_size 64
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.05 --batch_size 64 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.05 --batch_size 64 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.05 --batch_size 64 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.05 --batch_size 64
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.05 --batch_size 64 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.05 --batch_size 128 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.05 --batch_size 128 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.05 --batch_size 128 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.05 --batch_size 128 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.05 --batch_size 128 
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.05 --batch_size 128 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.05 --batch_size 256 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.05 --batch_size 256 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.05 --batch_size 256 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.05 --batch_size 256 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.05 --batch_size 256 
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.05 --batch_size 256 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.05 --batch_size 512 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.05 --batch_size 512 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.05 --batch_size 512 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.05 --batch_size 512 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.05 --batch_size 512 
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.05 --batch_size 512 
+
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.01 --batch_size 64
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.01 --batch_size 64 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.01 --batch_size 64 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.01 --batch_size 64 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.01 --batch_size 64
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.01 --batch_size 64 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.01 --batch_size 128 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.01 --batch_size 128 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.01 --batch_size 128 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.01 --batch_size 128 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.01 --batch_size 128 
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.01 --batch_size 128 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.01 --batch_size 256 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.01 --batch_size 256 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.01 --batch_size 256 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.01 --batch_size 256 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.01 --batch_size 256 
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.01 --batch_size 256 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.01 --batch_size 512 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.01 --batch_size 512 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.01 --batch_size 512 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.01 --batch_size 512 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.01 --batch_size 512 
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.01 --batch_size 512 
+
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.25 --batch_size 64
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.25 --batch_size 64 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.25 --batch_size 64 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.25 --batch_size 64 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.25 --batch_size 64
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.25 --batch_size 64 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.25 --batch_size 128 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.25 --batch_size 128 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.25 --batch_size 128 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.25 --batch_size 128 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.25 --batch_size 128 
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.25 --batch_size 128 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.25 --batch_size 256 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.25 --batch_size 256 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.25 --batch_size 256 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.25 --batch_size 256 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.25 --batch_size 256 
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.25 --batch_size 256 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.25 --batch_size 512 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.25 --batch_size 512 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.25 --batch_size 512 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.25 --batch_size 512 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.25 --batch_size 512 
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.25 --batch_size 512 
+
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.002 --batch_size 64
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.002 --batch_size 64 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.002 --batch_size 64 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.002 --batch_size 64 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.002 --batch_size 64
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.002 --batch_size 64 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.002 --batch_size 128 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.002 --batch_size 128 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.002 --batch_size 128 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.002 --batch_size 128 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.002 --batch_size 128 
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.002 --batch_size 128 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.002 --batch_size 256 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.002 --batch_size 256 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.002 --batch_size 256 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.002 --batch_size 256 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.002 --batch_size 256 
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.002 --batch_size 256 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.002 --batch_size 512 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.002 --batch_size 512 
+# !python forgetting_check_hard.py --mode greedy --num_epochs 25 --learning_rate 0.002 --batch_size 512 
+# !python forgetting_check_hard.py --mode normal --num_epochs 5 --learning_rate 0.002 --batch_size 512 
+# !python forgetting_check_hard.py --mode normal --num_epochs 1 --learning_rate 0.002 --batch_size 512 
+# !python forgetting_check_hard.py --mode normal --num_epochs 25 --learning_rate 0.002 --batch_size 512 
