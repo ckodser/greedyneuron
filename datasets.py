@@ -76,9 +76,8 @@ def get_dataloaders(dataset_name, batch_size, seed):
     return trainDataloader, valDataloader, testDataloader, input_shape[dataset_name]
 
 
-def get_subset(dataset, labels, index):
+def get_subset(dataset, labels):
     idx = np.in1d(dataset.targets, labels)
-    idx = np.array([id for id in idx if idx in index])
     splited_dataset = copy.deepcopy(dataset)
     splited_dataset.targets = splited_dataset.targets[idx]
     splited_dataset.targets = (splited_dataset.targets != labels[0])
