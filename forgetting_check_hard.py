@@ -89,6 +89,9 @@ if __name__ == "__main__":
         torch.nn.modules.module.register_module_full_backward_hook(hook)
     print(model)
 
+    best_model = {}
+    for key in model.state_dict():
+        best_model[key] = model.state_dict()[key].clone()
 
     for task_id in range(len(trainDataloaders)):
         optimizer = torch.optim.SGD(params=model.parameters(), lr=lr)
@@ -126,10 +129,19 @@ if __name__ == "__main__":
                         track_model(model, epoch, step)
             scheduler.step()
             set_to_eval(model)
-            normal_eval_forgetting_hard(model, valDataloaders, epoch, loss_func, name="val")
-            normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, name="test")
-        normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, name="final_test")
+            acc, _=normal_eval_forgetting_hard(model, valDataloaders, epoch, loss_func, name="val")
+            if acc > best_acc:
+                best_model = {}
+                for key in model.state_dict():
+                    best_model[key] = model.state_dict()[key].clone()
+                best_acc = acc
 
+            normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, name="test")
+    normal_eval_forgetting_hard(model, testDataloaders, 0, loss_func, name="realfinal_test")
+    normal_eval_forgetting_hard(model, valDataloaders, 0, loss_func, name="realfinal_val")
+    model.load_state_dict(best_model)
+    normal_eval_forgetting_hard(model, testDataloaders, 0, loss_func, name="best_realfinal_test")
+    normal_eval_forgetting_hard(model, valDataloaders, 0, loss_func, name="best_realfinal_val")
 
 # !python forgetting_check_hard.py --mode greedy --num_epochs 5 --learning_rate 0.05 --batch_size 64
 # !python forgetting_check_hard.py --mode greedy --num_epochs 1 --learning_rate 0.05 --batch_size 64 
