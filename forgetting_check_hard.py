@@ -132,6 +132,7 @@ if __name__ == "__main__":
                     if step == 0:
                         print("TRACK MODEL")
                         track_model(model, epoch, step)
+
             scheduler.step()
             set_to_eval(model)
             acc, _, _=normal_eval_forgetting_hard(model, valDataloaders, epoch, loss_func, name="val")
@@ -143,6 +144,8 @@ if __name__ == "__main__":
             normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, name="test")
             if end_task:
                 break
+        if not end_task:
+            exit(1)
 
     normal_eval_forgetting_hard(model, testDataloaders, 0, loss_func, name="realfinal_test")
     normal_eval_forgetting_hard(model, valDataloaders, 0, loss_func, name="realfinal_val")
