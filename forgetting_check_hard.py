@@ -100,6 +100,7 @@ if __name__ == "__main__":
         trainDataloader=trainDataloaders[task_id]
 
         epoch = 0
+        end_task=False
         for epoch in range(0, epochs):
             set_to_train(model)
             logwriter.log("training_monitor/learning_rate", scheduler.get_last_lr()[0], epoch)
@@ -121,23 +122,28 @@ if __name__ == "__main__":
 
                     logwriter.log("training_monitor/train_loss", loss, epoch, step, silent=True)
                     if step % 40 == 1:
+                        acc, _, acces = normal_eval_forgetting_hard(model, valDataloaders, epoch, loss_func, name="val", log=False)
                         print(f"train_loss:{avgloss / 40}  epoch:{epoch}, batch:{step}")
-
                         avgloss = 0
+                        if acces[task_id] > 0.95:
+                            end_task=True
+                            break
 
                     if step == 0:
                         print("TRACK MODEL")
                         track_model(model, epoch, step)
             scheduler.step()
             set_to_eval(model)
-            acc, _=normal_eval_forgetting_hard(model, valDataloaders, epoch, loss_func, name="val")
+            acc, _, _=normal_eval_forgetting_hard(model, valDataloaders, epoch, loss_func, name="val")
             if acc > best_acc:
                 best_model = {}
                 for key in model.state_dict():
                     best_model[key] = model.state_dict()[key].clone()
                 best_acc = acc
-
             normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, name="test")
+            if end_task:
+                break
+
     normal_eval_forgetting_hard(model, testDataloaders, 0, loss_func, name="realfinal_test")
     normal_eval_forgetting_hard(model, valDataloaders, 0, loss_func, name="realfinal_val")
     model.load_state_dict(best_model)

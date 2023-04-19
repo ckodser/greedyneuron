@@ -111,9 +111,10 @@ def normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, device
                 logwriter.log(f"performance_eval/{name}_accuracy_{task_id}", acc, epoch)
 
     acc, loss= np.mean(np.array(acces)), np.mean(np.array(losses))
-    logwriter.log(f"performance_eval/{name}_loss_average", loss, epoch)
-    logwriter.log(f"performance_eval/{name}_accuracy_average", acc, epoch)
-    return acc, loss
+    if log:
+        logwriter.log(f"performance_eval/{name}_loss_average", loss, epoch)
+        logwriter.log(f"performance_eval/{name}_accuracy_average", acc, epoch)
+    return acc, loss, acces
 
 
 def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True, dataset_name="validation"):
