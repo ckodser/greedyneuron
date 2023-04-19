@@ -34,7 +34,7 @@ if __name__ == "__main__":
     dataset_name = args.dataset
     hidden_layers = list(map(int, args.model_layers.split(",")))
     mode = args.mode
-    c_run_name = f"{args.run_name}_{dataset_name}_MODE{mode}_MODEL_{args.model_type}_{str(hidden_layers)[1:-1]}_BS{batch_size}_LR{lr}_E{epochs}_{args.extravert_mult}{args.extravert_bias}"
+    c_run_name = f"{args.run_name}_{dataset_name}_MODE{mode}_MODEL_{args.model_type}_BS{batch_size}_LR{lr}_E{epochs}"
 
 
     print(c_run_name)
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
     for task_id in range(len(trainDataloaders)):
         optimizer = torch.optim.SGD(params=model.parameters(), lr=lr)
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, epochs // 2, gamma=0.1)
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, (epochs+1) // 2, gamma=0.1)
         trainDataloader=trainDataloaders[task_id]
 
         epoch = 0
