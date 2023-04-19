@@ -18,7 +18,7 @@ def get_args():
     parser.add_argument('--number_of_worker', default=1, type=int)
     parser.add_argument('--num_epochs', default=5, type=int)
     parser.add_argument('--seed', default=0, type=int)
-    parser.add_argument('--run_name', default='until0.95_', type=str)
+    parser.add_argument('--run_name', default='until0.98_', type=str)
     parser.add_argument('--extravert_bias', default=0, type=float)
     parser.add_argument('--extravert_mult', default=1/2, type=float)
     return parser.parse_args()
@@ -125,7 +125,7 @@ if __name__ == "__main__":
                         acc, _, acces = normal_eval_forgetting_hard(model, valDataloaders, epoch, loss_func, name="val", log=False)
                         print(f"train_loss:{avgloss / 40}  epoch:{epoch}, batch:{step}")
                         avgloss = 0
-                        if acces[task_id] > 0.95:
+                        if acces[task_id] > 0.98:
                             end_task=True
                             break
 
