@@ -125,9 +125,9 @@ if __name__ == "__main__":
                         acc, _, acces = normal_eval_forgetting_hard(model, valDataloaders, epoch, loss_func, name="val", log=False)
                         print(f"train_loss:{avgloss / 40}  epoch:{epoch}, batch:{step}")
                         avgloss = 0
-                        if acces[task_id] > 0.95:
-                            end_task=True
-                            break
+                        # if acces[task_id] > 0.95:
+                        #     end_task=True
+                        #     break
 
                     if step == 0:
                         print("TRACK MODEL")
@@ -142,10 +142,10 @@ if __name__ == "__main__":
                     best_model[key] = model.state_dict()[key].clone()
                 best_acc = acc
             normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, name="test")
-            if end_task:
-                break
-        if not end_task:
-            exit(1)
+            # if end_task:
+            #     break
+        # if not end_task:
+        #     exit(1)
 
     normal_eval_forgetting_hard(model, testDataloaders, 0, loss_func, name="realfinal_test")
     normal_eval_forgetting_hard(model, valDataloaders, 0, loss_func, name="realfinal_val")
