@@ -21,9 +21,12 @@ def checkOK(name, A, epoch, step=0):
     B = B[B > eps]
     # if "weight" in name:
     #     print(name, math.sqrt(torch.var(B).item()), torch.min(B).item(), torch.max(B).item())
-    logwriter.log(f"correctness_of_greedy/{name}", math.sqrt(torch.var(B).item()) / torch.mean(B).item(), epoch, step,
+    logwriter.log(f""
+                  f"correctness_of_greedy/{name}", math.sqrt(torch.var(B).item()) / torch.mean(B).item(), epoch, step,
                   silent=True)
-
+    logwriter.log(f""
+                  f"correctness_of_greedy_mean/{name}", torch.mean(B).item(), epoch, step,
+                  silent=True)
 
 # %%
 def track_model(model, epoch, step=0):
