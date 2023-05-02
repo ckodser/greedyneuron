@@ -34,7 +34,7 @@ def hook(module, grad_input, grad_output):
                 f = torch.sqrt(torch.sum(Gw * Gw, dim=[1])).view(1, -1)
                 """
                 f=how much each neuron update its weights
-                by assumption 2 this value for all neurons should be equal,
+                by update assumption this value for all neurons should be equal,
                 to make it a multi-agent neural network.
                 using this information we should scale gradient to make it equality between neurons.
                 """
@@ -45,9 +45,10 @@ def hook(module, grad_input, grad_output):
             # this neuron is still not going to change its input
             # results in a numerical instability
             Gr = Go / (f + eps)
-            f_normalize = f / (
-                    math.sqrt(torch.sum(GA * GA) / (torch.sum(Gr * Gr) + eps)) + eps)
-            Grn = Go / (f_normalize + eps)
+            ####f_normalize = f / (
+            ####        math.sqrt(torch.sum(GA * GA) / (torch.sum(Gr * Gr) + eps)) + eps)
+            ####Grn = Go / (f_normalize + eps)
+            Grn=Gr
             # Gr and Grn are same but they differ only by a scaler,
             # we want to keep norm of gradients similar to error-backpropagation
             if isinstance(module, LinearGradChangerExtraverts):
