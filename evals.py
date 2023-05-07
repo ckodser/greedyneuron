@@ -243,15 +243,15 @@ def sparse_eval(model: torch.nn.Module, testDataloader, loss_func, p):
     return acc, loss
 
 
-def strong_sparse_eval(model, testDataloader, loss_func):
+def strong_sparse_eval(model, testDataloader, loss_func, dataset_name):
     pruning = [0, 0.5, 0.7, 0.9, 0.95, 0.97, 0.98, 0.99, 0.995, 0.999]
     for p in pruning:
         acc, loss = sparse_eval(model, testDataloader, loss_func, p)
-        logwriter.log("performance_eval/sparse_loss_t", loss, p * 1000, translate=False)
-        logwriter.log("performance_eval/sparse_acc_t", acc, p * 1000, translate=False)
+        logwriter.log(f"performance_eval/{dataset_name}_sparse_loss_t", loss, p * 1000, translate=False)
+        logwriter.log(f"performance_eval/{dataset_name}_sparse_acc_t", acc, p * 1000, translate=False)
 
 
-def noise_robust_eval(model, testDataloader, epoch, loss_func, eps, dataset_name, device="cuda"):
+def noise_robust_eval(model, testDataloader, epoch, loss_func, eps, dataset_name, device="cuda", prefix=""):
     correct = 0
     total = 0
     loss = 0
@@ -269,8 +269,8 @@ def noise_robust_eval(model, testDataloader, epoch, loss_func, eps, dataset_name
 
     acc = (correct / total)
     loss = loss / len(testDataloader)
-    logwriter.log("performance_eval/noise robust_test_loss", loss, epoch)
-    logwriter.log("performance_eval/noise robust_accuracy", acc, epoch)
+    logwriter.log(f"performance_eval/{prefix}noise robust_test_loss{eps}", loss, epoch)
+    logwriter.log(f"performance_eval/{prefix}noise robust_accuracy{eps}", acc, epoch)
 
 
 def check_cos_similarity(model, testDataloader, loss_func, layer):
