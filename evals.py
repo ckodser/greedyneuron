@@ -226,9 +226,10 @@ def strong_robust_eval(model, testDataloader, loss_func, eps, iters, dataset_nam
 
 
 def sparse_tensor(a, p):
-    threshold = torch.quantile(torch.abs(a), p, interpolation='linear')
-    a[torch.abs(a) < threshold] = 0
-    return a
+    b=torch.flatten(a)
+    threshold = torch.quantile(torch.abs(b), q=p, dim=0, keepdim=False, interpolation='linear')
+    b[torch.abs(b) < threshold] = 0
+    return torch.reshape(b, a.shape)
 
 
 def sparse_eval(model: torch.nn.Module, testDataloader, loss_func, p):
@@ -240,11 +241,14 @@ def sparse_eval(model: torch.nn.Module, testDataloader, loss_func, p):
     model.load_state_dict(t)
     acc, loss = normal_eval(model, testDataloader, None, loss_func, log=False)
     model.load_state_dict(s)
+    # for y in model.state_dict():
+    #     if "weight" in y:
+    #         print(len(torch.nonzero(model.state_dict()[y]))/torch.numel(model.state_dict()[y]))
     return acc, loss
 
 
 def strong_sparse_eval(model, testDataloader, loss_func, dataset_name):
-    pruning = [0, 0.5, 0.7, 0.9, 0.95, 0.97, 0.98, 0.99, 0.995, 0.999]
+    pruning = [0, 0.05, 0.1, 0.15, 0.20, 0.25, 0.30, 0.35, 0.4, 0.45, 0.5, 0.55, 0.60, 0.7, 0.75, 0.80, 0.85, 0.9, 0.95, 0.97, 0.98, 0.99, 0.995, 0.999]
     for p in pruning:
         acc, loss = sparse_eval(model, testDataloader, loss_func, p)
         logwriter.log(f"performance_eval/{dataset_name}_sparse_loss_t", loss, p * 1000, translate=False)
