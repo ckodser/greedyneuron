@@ -91,7 +91,7 @@ if __name__ == "__main__":
         torch.nn.modules.module.register_module_full_backward_hook(hook)
     print(model)
     optimizer = torch.optim.SGD(params=model.parameters(), lr=lr)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, epochs // 2, gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, max(1,epochs // 2), gamma=0.1)
     set_name(model)
     epoch = 0
     best_model = {}
