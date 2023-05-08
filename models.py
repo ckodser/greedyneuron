@@ -125,20 +125,22 @@ class LinearGradChangerExtraverts(nn.Module):
 
 
 class GreedyConv2dPlain(nn.Module):
-    def __init__(self, input_feature, output_feature, kernel_size, stride, padding):
+    def __init__(self, input_feature, output_feature, kernel_size, stride, padding, bias):
         super().__init__()
 
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
 
-        conv = nn.Conv2d(input_feature, output_feature, kernel_size, stride)
+        conv = nn.Conv2d(input_feature, output_feature, kernel_size, stride, bias=bias)
         self.weight = torch.nn.parameter.Parameter(data=conv.weight.clone(), requires_grad=True)
-        self.bias = torch.nn.parameter.Parameter(data=conv.bias.clone(), requires_grad=True)
         self.register_parameter("Gconv2dweight", self.weight)
-        self.register_parameter("Gconv2dbias", self.bias)
+        if self.bias:
+            self.bias = torch.nn.parameter.Parameter(data=conv.bias.clone(), requires_grad=True)
+            self.register_parameter("Gconv2dbias", self.bias)
         with torch.no_grad():
-            self.bias_initial_norm = torch.linalg.norm(self.bias.data)
+            if self.bias:
+                self.bias_initial_norm = torch.linalg.norm(self.bias.data)
             self.weigth_initial_norm = torch.linalg.matrix_norm(self.weight.data)
         self.convGradChanger = ConvGradChanger(self.stride, self.padding)
 
@@ -146,7 +148,7 @@ class GreedyConv2dPlain(nn.Module):
         A = F.conv2d(input, self.weight, torch.zeros(self.weight.shape[0], device=self.weight.device),
                      self.stride, self.padding)
         O = self.convGradChanger(A, input, self.weight)
-        return O + self.bias.view(1, -1, 1, 1)
+        return O + self.bias.view(1, -1, 1, 1) if self.bias else O
 
 
 class GreedyConv2dPlainExtraverts(nn.Module):
@@ -229,7 +231,7 @@ class GreedyLinearPlainExtraverts(GreedyLinearPlain):
 
 
 class GLinear(nn.Module):
-    def __init__(self, input_size, output_size, mode, activation, extravert_mult=1, extravert_bias=0):
+    def __init__(self, input_size, output_size, mode="greedy", activation=None, extravert_mult=1, extravert_bias=0):
         """
         A linear Module
         :param input_size: input features
@@ -263,21 +265,20 @@ class GLinear(nn.Module):
 
 
 class GConv2d(nn.Module):
-    def __init__(self, input_feature, output_feature, kernel_size, stride, padding, mode, activation, extravert_mult,
-                 extravert_bias):
+    def __init__(self, input_feature, output_feature, kernel_size, stride=1, padding=0, mode="greedy", bias=True,
+                 activation=None, extravert_mult=1, extravert_bias=0):
         super().__init__()
         assert mode in ["greedy", "normal", "intel"]
         self.mode = mode
         self.activation = activation
         if self.mode == "normal":
-            self.conv2d = torch.nn.Conv2d(input_feature, output_feature, kernel_size, stride)
+            self.conv2d = torch.nn.Conv2d(input_feature, output_feature, kernel_size, stride, bias=bias)
         if self.mode == "greedy":
             self.conv2d = GreedyConv2dPlain(input_feature, output_feature, kernel_size,
-                                            stride=stride, padding=padding)
+                                            stride=stride, padding=padding, bias=bias)
         if self.mode == "greedyExtraverts":
             self.linear = GreedyConv2dPlainExtraverts(input_feature, output_feature, kernel_size, extravert_mult,
                                                       extravert_bias, stride=stride, padding=padding)
-
         if self.mode == "intel":
             self.bn = nn.BatchNorm2d(output_feature)
 
