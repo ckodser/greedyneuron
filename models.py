@@ -133,10 +133,10 @@ class GreedyConv2dPlain(nn.Module):
         self.padding = padding
 
         conv = nn.Conv2d(input_feature, output_feature, kernel_size, stride, bias=bias)
-        self.weight = torch.nn.parameter.Parameter(data=conv.weight.clone(), requires_grad=True)
+        self.weight = torch.nn.parameter.Parameter(data=conv.weight.clone(), requires_grad=True).cuda()
         self.register_parameter("Gconv2dweight", self.weight)
         if self.bias:
-            self.bias = torch.nn.parameter.Parameter(data=conv.bias.clone(), requires_grad=True)
+            self.bias = torch.nn.parameter.Parameter(data=conv.bias.clone(), requires_grad=True).cuda()
             self.register_parameter("Gconv2dbias", self.bias)
         with torch.no_grad():
             if self.bias:
@@ -191,8 +191,8 @@ class GreedyLinearPlain(nn.Module):
         super().__init__()
 
         linear = nn.Linear(input_feature, output_feature)
-        self.weight = torch.nn.parameter.Parameter(data=linear.weight.clone(), requires_grad=True)
-        self.bias = torch.nn.parameter.Parameter(data=linear.bias.clone(), requires_grad=True)
+        self.weight = torch.nn.parameter.Parameter(data=linear.weight.clone(), requires_grad=True).cuda()
+        self.bias = torch.nn.parameter.Parameter(data=linear.bias.clone(), requires_grad=True).cuda()
         if residual_initialization:
             if input_feature == output_feature:
                 self.weight.data = torch.eye(self.weight.data.shape[0])
