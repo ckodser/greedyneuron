@@ -40,7 +40,7 @@ class BasicBlock(nn.Module):
             raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
         # Both self.conv1 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv3x3(inplanes, planes, stride)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu1, self.relu2 = nn.ReLU(),  nn.ReLU()
         self.conv2 = conv3x3(planes, planes)
         self.downsample = downsample
         self.stride = stride
@@ -49,7 +49,7 @@ class BasicBlock(nn.Module):
         identity = x
 
         out = self.conv1(x)
-        out = self.relu(out)
+        out = self.relu1(out)
 
         out = self.conv2(out)
 
@@ -57,7 +57,7 @@ class BasicBlock(nn.Module):
             identity = self.downsample(x)
 
         out += identity
-        out = self.relu(out)
+        out = self.relu2(out)
 
         return out
 
@@ -87,7 +87,7 @@ class Bottleneck(nn.Module):
         self.conv1 = conv1x1(inplanes, width)
         self.conv2 = conv3x3(width, width, stride, groups, dilation)
         self.conv3 = conv1x1(width, planes * self.expansion)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu1, self.relu2, self.relu3 = nn.ReLU(), nn.ReLU(), nn.ReLU()
         self.downsample = downsample
         self.stride = stride
 
@@ -95,10 +95,10 @@ class Bottleneck(nn.Module):
         identity = x
 
         out = self.conv1(x)
-        out = self.relu(out)
+        out = self.relu1(out)
 
         out = self.conv2(out)
-        out = self.relu(out)
+        out = self.relu2(out)
 
         out = self.conv3(out)
 
@@ -106,7 +106,7 @@ class Bottleneck(nn.Module):
             identity = self.downsample(x)
 
         out += identity
-        out = self.relu(out)
+        out = self.relu3(out)
 
         return out
 
@@ -138,7 +138,7 @@ class ResNet(nn.Module):
         self.base_width = width_per_group
         self.conv1 = GConv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
                                bias=False)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0])
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
