@@ -152,7 +152,7 @@ class ResNet(nn.Module):
 
         for m in self.modules():
             if isinstance(m, GConv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.conv2d.weight, mode='fan_out', nonlinearity='relu')
             elif isinstance(m, (nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)

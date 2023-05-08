@@ -127,7 +127,7 @@ class LinearGradChangerExtraverts(nn.Module):
 class GreedyConv2dPlain(nn.Module):
     def __init__(self, input_feature, output_feature, kernel_size, stride, padding, bias):
         super().__init__()
-        self.bias=bias
+        self.bias = bias
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
