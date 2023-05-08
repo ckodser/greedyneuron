@@ -8,10 +8,12 @@ import datasets
 import argparse
 import simpresnet
 
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_type', default='MLP', type=str,
-                        choices={'MLP', 'CNN', 'CNNWide', "LeNET", "ClassifierCNNShit", "ClassifierCNNDeep", "resnet-18"})
+                        choices={'MLP', 'CNN', 'CNNWide', "LeNET", "ClassifierCNNShit", "ClassifierCNNDeep",
+                                 "resnet-18"})
     parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str, )
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal', 'intel', 'greedyExtraverts'})
     parser.add_argument('--dataset', default='MNIST', type=str,
@@ -22,6 +24,7 @@ def get_args():
     parser.add_argument('--num_epochs', default=25, type=int)
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--run_name', default='not2', type=str)
+    parser.add_argument('--normalize', default='False', type=str)
     parser.add_argument('--extravert_bias', default=0, type=float)
     parser.add_argument('--extravert_mult', default=1 / 2, type=float)
     return parser.parse_args()
@@ -82,8 +85,7 @@ if __name__ == "__main__":
     if args.model_type == "LeNET":
         model = LeNet(10, mode, input_shape[0], args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "resnet-18":
-        model = simpresnet.resnet18(num_classes=10)
-
+        model = simpresnet.resnet18(num_classes=10, normalize=(args.normalize == "True"))
 
     loss_func = torch.nn.CrossEntropyLoss()
     for y in model.state_dict():
@@ -95,7 +97,7 @@ if __name__ == "__main__":
         torch.nn.modules.module.register_module_full_backward_hook(hook)
     print(model)
     optimizer = torch.optim.SGD(params=model.parameters(), lr=lr)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, max(1,epochs // 2), gamma=0.1)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, max(1, epochs // 2), gamma=0.1)
     set_name(model)
     epoch = 0
     best_model = {}

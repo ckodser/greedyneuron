@@ -3,16 +3,18 @@ from torch import Tensor
 import torch.nn as nn
 from typing import Type, Any, Callable, Union, List, Optional
 from models import GLinear, GConv2d
-#GConv2d: input_feature, output_feature, kernel_size, stride, padding
+
+# GConv2d: input_feature, output_feature, kernel_size, stride, padding
 
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
            'resnet152', 'resnext50_32x4d', 'resnext101_32x8d',
            'wide_resnet50_2', 'wide_resnet101_2']
 
+
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> GConv2d:
     """3x3 convolution with padding"""
     return GConv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=dilation, bias=False)
+                   padding=dilation, bias=False)
 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> GConv2d:
@@ -24,14 +26,15 @@ class BasicBlock(nn.Module):
     expansion: int = 1
 
     def __init__(
-        self,
-        inplanes: int,
-        planes: int,
-        stride: int = 1,
-        downsample: Optional[nn.Module] = None,
-        groups: int = 1,
-        base_width: int = 64,
-        dilation: int = 1,
+            self,
+            inplanes: int,
+            planes: int,
+            stride: int = 1,
+            downsample: Optional[nn.Module] = None,
+            groups: int = 1,
+            base_width: int = 64,
+            dilation: int = 1,
+            normalize=False,
     ) -> None:
         super(BasicBlock, self).__init__()
         if groups != 1 or base_width != 64:
@@ -40,18 +43,28 @@ class BasicBlock(nn.Module):
             raise NotImplementedError("Dilation > 1 not supported in BasicBlock")
         # Both self.conv1 and self.downsample layers downsample the input when stride != 1
         self.conv1 = conv3x3(inplanes, planes, stride)
-        self.relu1, self.relu2 = nn.ReLU(),  nn.ReLU()
+        self.relu1, self.relu2 = nn.ReLU(), nn.ReLU()
         self.conv2 = conv3x3(planes, planes)
         self.downsample = downsample
         self.stride = stride
+        self.normalize = normalize
+
+        if self.normalize:
+            norm_layer = nn.BatchNorm2d
+            self.bn1 = norm_layer(planes)
+            self.bn2 = norm_layer(planes)
 
     def forward(self, x: Tensor) -> Tensor:
         identity = x
 
         out = self.conv1(x)
+        if self.normalize:
+            out = self.bn1(out)
         out = self.relu1(out)
 
         out = self.conv2(out)
+        if self.normalize:
+            out = self.bn2(out)
 
         if self.downsample is not None:
             identity = self.downsample(x)
@@ -72,14 +85,15 @@ class Bottleneck(nn.Module):
     expansion: int = 4
 
     def __init__(
-        self,
-        inplanes: int,
-        planes: int,
-        stride: int = 1,
-        downsample: Optional[nn.Module] = None,
-        groups: int = 1,
-        base_width: int = 64,
-        dilation: int = 1,
+            self,
+            inplanes: int,
+            planes: int,
+            stride: int = 1,
+            downsample: Optional[nn.Module] = None,
+            groups: int = 1,
+            base_width: int = 64,
+            dilation: int = 1,
+            normalize=False,
     ) -> None:
         super(Bottleneck, self).__init__()
         width = int(planes * (base_width / 64.)) * groups
@@ -90,18 +104,30 @@ class Bottleneck(nn.Module):
         self.relu1, self.relu2, self.relu3 = nn.ReLU(), nn.ReLU(), nn.ReLU()
         self.downsample = downsample
         self.stride = stride
+        self.normalize = normalize
+
+        if self.normalize:
+            norm_layer = nn.BatchNorm2d
+            self.bn1 = norm_layer(width)
+            self.bn2 = norm_layer(width)
+            self.bn3 = norm_layer(planes * self.expansion)
 
     def forward(self, x: Tensor) -> Tensor:
         identity = x
 
         out = self.conv1(x)
+        if self.normalize:
+            out = self.bn1(out)
         out = self.relu1(out)
 
         out = self.conv2(out)
+        if self.normalize:
+            out = self.bn2(out)
         out = self.relu2(out)
 
         out = self.conv3(out)
-
+        if self.normalize:
+            out = self.bn3(out)
         if self.downsample is not None:
             identity = self.downsample(x)
 
@@ -114,16 +140,22 @@ class Bottleneck(nn.Module):
 class ResNet(nn.Module):
 
     def __init__(
-        self,
-        block: Type[Union[BasicBlock, Bottleneck]],
-        layers: List[int],
-        num_classes: int = 1000,
-        zero_init_residual: bool = False,
-        groups: int = 1,
-        width_per_group: int = 64,
-        replace_stride_with_dilation: Optional[List[bool]] = None,
+            self,
+            block: Type[Union[BasicBlock, Bottleneck]],
+            layers: List[int],
+            num_classes: int = 1000,
+            zero_init_residual: bool = False,
+            groups: int = 1,
+            width_per_group: int = 64,
+            replace_stride_with_dilation: Optional[List[bool]] = None,
+            normalize=False,
     ) -> None:
         super(ResNet, self).__init__()
+        self.normalize = normalize
+
+        if self.normalize:
+            norm_layer = nn.BatchNorm2d
+            self._norm_layer = norm_layer
 
         self.inplanes = 64
         self.dilation = 1
@@ -136,8 +168,10 @@ class ResNet(nn.Module):
                              "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
         self.groups = groups
         self.base_width = width_per_group
+        if self.normalize:
+            self.bn1 = norm_layer(self.inplanes)
         self.conv1 = GConv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
-                               bias=False)
+                             bias=False)
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0])
@@ -150,11 +184,11 @@ class ResNet(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = GLinear(512 * block.expansion, num_classes)
 
-        self.upsaple=torch.nn.Upsample((128,128))
+        self.upsaple = torch.nn.Upsample((128, 128))
         for m in self.modules():
             if isinstance(m, GConv2d):
                 nn.init.kaiming_normal_(m.conv2d.weight, mode='fan_out', nonlinearity='relu')
-            elif isinstance(m, (nn.GroupNorm)):
+            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
 
@@ -182,17 +216,19 @@ class ResNet(nn.Module):
 
         layers = []
         layers.append(block(self.inplanes, planes, stride, downsample, self.groups,
-                            self.base_width, previous_dilation))
+                            self.base_width, previous_dilation, normalize=self.normalize))
         self.inplanes = planes * block.expansion
         for _ in range(1, blocks):
             layers.append(block(self.inplanes, planes, groups=self.groups,
-                                base_width=self.base_width, dilation=self.dilation))
+                                base_width=self.base_width, dilation=self.dilation, normalize=self.normalize))
 
         return nn.Sequential(*layers)
 
     def _forward_impl(self, x: Tensor) -> Tensor:
         # See note [TorchScript super()]
         x = self.conv1(x)
+        if self.normalize:
+            x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
 
@@ -208,17 +244,17 @@ class ResNet(nn.Module):
         return x
 
     def forward(self, x: Tensor) -> Tensor:
-        x=self.upsaple(x)
+        x = self.upsaple(x)
         return self._forward_impl(x)
 
 
 def _resnet(
-    arch: str,
-    block: Type[Union[BasicBlock, Bottleneck]],
-    layers: List[int],
-    pretrained: bool,
-    progress: bool,
-    **kwargs: Any
+        arch: str,
+        block: Type[Union[BasicBlock, Bottleneck]],
+        layers: List[int],
+        pretrained: bool,
+        progress: bool,
+        **kwargs: Any
 ) -> ResNet:
     model = ResNet(block, layers, **kwargs)
     if pretrained:
