@@ -150,6 +150,7 @@ class ResNet(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = GLinear(512 * block.expansion, num_classes)
 
+        self.upsaple=torch.nn.Upsample((224,244))
         for m in self.modules():
             if isinstance(m, GConv2d):
                 nn.init.kaiming_normal_(m.conv2d.weight, mode='fan_out', nonlinearity='relu')
@@ -207,6 +208,7 @@ class ResNet(nn.Module):
         return x
 
     def forward(self, x: Tensor) -> Tensor:
+        x=self.upsaple(x)
         return self._forward_impl(x)
 
 
