@@ -127,7 +127,7 @@ class LinearGradChangerExtraverts(nn.Module):
 class GreedyConv2dPlain(nn.Module):
     def __init__(self, input_feature, output_feature, kernel_size, stride, padding, bias):
         super().__init__()
-        self.bias = bias
+        self.has_bias = bias
         self.kernel_size = kernel_size
         self.stride = stride
         self.padding = padding
@@ -135,11 +135,11 @@ class GreedyConv2dPlain(nn.Module):
         conv = nn.Conv2d(input_feature, output_feature, kernel_size, stride, bias=bias)
         self.weight = torch.nn.parameter.Parameter(data=conv.weight.clone().cuda(), requires_grad=True)
         self.register_parameter("Gconv2dweight", self.weight)
-        if self.bias:
+        if self.has_bias:
             self.bias = torch.nn.parameter.Parameter(data=conv.bias.clone().cuda(), requires_grad=True)
             self.register_parameter("Gconv2dbias", self.bias)
         with torch.no_grad():
-            if self.bias:
+            if self.has_bias:
                 self.bias_initial_norm = torch.linalg.norm(self.bias.data)
             self.weigth_initial_norm = torch.linalg.matrix_norm(self.weight.data)
         self.convGradChanger = ConvGradChanger(self.stride, self.padding)
@@ -148,7 +148,7 @@ class GreedyConv2dPlain(nn.Module):
         A = F.conv2d(input, self.weight, torch.zeros(self.weight.shape[0], device=self.weight.device),
                      self.stride, self.padding)
         O = self.convGradChanger(A, input, self.weight)
-        return O + self.bias.view(1, -1, 1, 1) if self.bias else O
+        return O + self.bias.view(1, -1, 1, 1) if self.has_bias else O
 
 
 class GreedyConv2dPlainExtraverts(nn.Module):
