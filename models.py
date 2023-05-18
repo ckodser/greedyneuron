@@ -48,7 +48,7 @@ def hook(module, grad_input, grad_output):
             ####f_normalize = f / (
             ####        math.sqrt(torch.sum(GA * GA) / (torch.sum(Gr * Gr) + eps)) + eps)
             ####Grn = Go / (f_normalize + eps)
-            Grn=Gr
+            Grn=Gr/4
             # Gr and Grn are same but they differ only by a scaler,
             # we want to keep norm of gradients similar to error-backpropagation
             if isinstance(module, LinearGradChangerExtraverts):
