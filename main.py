@@ -16,13 +16,12 @@ def get_args():
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal'})
     parser.add_argument('--dataset', default='MNIST', type=str,
                         choices={'MNIST' "cifar10"})
-    parser.add_argument('--learning_rate', default=0.052, type=float)
-    parser.add_argument('--batch_size', default=512, type=int)
+    parser.add_argument('--learning_rate', type=float)
+    parser.add_argument('--batch_size', type=int)
     parser.add_argument('--number_of_worker', default=1, type=int)
-    parser.add_argument('--num_epochs', default=25, type=int)
+    parser.add_argument('--num_epochs', default=100, type=int)
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--run_name', default='classification', type=str)
-    parser.add_argument('--normalize', default='False', type=str)
     return parser.parse_args()
 
 
