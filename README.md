@@ -1,5 +1,6 @@
-these samples are hyperparameter tuned runs. You can reproduce hyperparameter tuning similarly. 
-you can change the seed using `--seed <seed>` where <seed> is your seed. 
+These samples are hyperparameter tuned runs. You can reproduce hyperparameter tuning similarly. 
+
+you can change the seed using `--seed <seed>` where <seed> is the random seed. 
 
 
 # Classification
