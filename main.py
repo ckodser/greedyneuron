@@ -19,7 +19,7 @@ def get_args():
     parser.add_argument('--learning_rate', type=float)
     parser.add_argument('--batch_size', type=int)
     parser.add_argument('--number_of_worker', default=1, type=int)
-    parser.add_argument('--num_epochs', default=100, type=int)
+    parser.add_argument('--num_epochs', default=200, type=int)
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--run_name', default='classification', type=str)
     return parser.parse_args()
@@ -64,14 +64,12 @@ if __name__ == "__main__":
         model = LeNet(10, mode, input_shape[0]).to(device)
 
     loss_func = torch.nn.CrossEntropyLoss()
-    for y in model.state_dict():
-        print(y, model.state_dict()[y].shape)
     set_to_eval(model)
     normal_eval(model, testDataloader, -1, loss_func)
 
     if "greedy" in mode:
         torch.nn.modules.module.register_module_full_backward_hook(hook)
-    print(model)
+
     optimizer = torch.optim.SGD(params=model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, max(1, epochs // 2), gamma=0.1)
     set_name(model)

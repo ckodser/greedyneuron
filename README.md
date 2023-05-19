@@ -6,10 +6,8 @@ python main.py --batch_size 256 --learning_rate 0.01 --mode greedy
 
 
 # Forgetting:
-python performance.py --batch_size 1024 --mode normal --dataset cifar10 --model_type "LeNET"
-python performance.py --batch_size 1024 --mode greedy --dataset cifar10 --model_type "LeNET"
-python performance.py --batch_size 1024 --mode normal
-python performance.py --batch_size 1024 --mode greedy
+python forgetting_check_hard.py --batch_size 1024 --learning_rate 0.01 --mode normal
+python forgetting_check_hard.py --batch_size 1024 --learning_rate 0.01 --mode greedy
 
 # Depth:
 

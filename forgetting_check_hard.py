@@ -9,15 +9,15 @@ import argparse
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_type', default='MLP', type=str,
-                        choices={'MLP', 'CNN', 'CNNWide', "LeNET"})
+                        choices={'MLP', "LeNET"})
     parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str, )
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal'})
     parser.add_argument('--dataset', default='MNIST', type=str,
-                        choices={'MNIST', "FashionMNIST", "cifar10", "cifar100"})
-    parser.add_argument('--learning_rate', default=0.05, type=float)
-    parser.add_argument('--batch_size', default=512, type=int)
+                        choices={'MNIST', "cifar10"})
+    parser.add_argument('--learning_rate', type=float)
+    parser.add_argument('--batch_size', type=int)
     parser.add_argument('--number_of_worker', default=1, type=int)
-    parser.add_argument('--num_epochs', default=5, type=int)
+    parser.add_argument('--num_epochs', default=25, type=int)
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--run_name', default='forgetting', type=str)
     return parser.parse_args()
@@ -61,14 +61,11 @@ if __name__ == "__main__":
     if args.model_type == "LeNET":
         model = LeNet(2, mode, input_shape[0]).to(device)
     loss_func = torch.nn.CrossEntropyLoss()
-    for y in model.state_dict():
-        print(y, model.state_dict()[y].shape)
     set_to_eval(model)
     normal_eval_forgetting_hard(model, valDataloaders, -1, loss_func, name="val")
     normal_eval_forgetting_hard(model, testDataloaders, -1, loss_func, name="test")
     if "greedy" in mode:
         torch.nn.modules.module.register_module_full_backward_hook(forgetting_hook)
-    print(model)
 
     best_acc = 0
     best_model = {}
