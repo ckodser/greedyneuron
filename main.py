@@ -6,7 +6,6 @@ from evals import *
 from logwriter import *
 import datasets
 import argparse
-import simpresnet
 
 
 def get_args():

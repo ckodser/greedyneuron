@@ -2,7 +2,6 @@ import copy
 
 import torch
 import torchvision
-from matplotlib import pyplot as plt
 from torch.utils.data import (
     Dataset,
     DataLoader,
@@ -75,12 +74,6 @@ def get_subset(dataset, labels):
     splited_dataset.targets = splited_dataset.targets[idx]
     splited_dataset.targets = (splited_dataset.targets != labels[0])
     splited_dataset.data = splited_dataset.data[idx]
-    for i, (x, y) in enumerate(splited_dataset):
-        plt.imshow(x[0])
-        plt.title(f"class={y}, task={labels}")
-        plt.show()
-        if i > 7:
-            break
     return splited_dataset
 
 

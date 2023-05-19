@@ -3,7 +3,6 @@ from tqdm import tqdm
 from models import *
 import datasets
 import argparse
-import simpresnet
 import time
 
 
