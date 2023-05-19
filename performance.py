@@ -62,12 +62,9 @@ if __name__ == "__main__":
         model = LeNet(10, mode, input_shape[0]).to(device)
 
     loss_func = torch.nn.CrossEntropyLoss()
-    for y in model.state_dict():
-        print(y, model.state_dict()[y].shape)
 
     if "greedy" in mode:
         torch.nn.modules.module.register_module_full_backward_hook(hook)
-    print(model)
 
     x = torch.randn((1024, *input_shape))
     y = torch.randint(low=0, high=9, size=(1024,))
