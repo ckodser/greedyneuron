@@ -97,7 +97,7 @@ if __name__ == "__main__":
                 # tracking
                 avgloss += loss.detach().item()
 
-        logwriter.log("training_monitor/train_loss", avgloss/len(trainDataloader), epoch, silent=True)
+        logwriter.log("training_monitor/train_loss", avgloss/(batch_size*len(trainDataloader)), epoch, silent=True)
         scheduler.step()
         set_to_eval(model)
         acc, loss = normal_eval(model, valDataloader, epoch, loss_func)

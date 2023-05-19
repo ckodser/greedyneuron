@@ -98,10 +98,8 @@ if __name__ == "__main__":
                     # tracking
                     avgloss += loss.detach().item()
 
-                    logwriter.log("training_monitor/train_loss", loss, epoch, step, silent=True)
-                    if step % 40 == 1:
-                        print(f"train_loss:{avgloss / 40}  epoch:{epoch}, batch:{step}")
-                        avgloss = 0
+            print(f"train_loss:{avgloss / (batch_size*len(trainDataloader))}  epoch:{epoch}, batch:{step}")
+            avgloss = 0
 
             scheduler.step()
             set_to_eval(model)
