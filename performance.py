@@ -10,7 +10,7 @@ import time
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_type', default='MLP', type=str,
-                        choices={'MLP' "LeNET"})
+                        choices={'MLP', "LeNET"})
     parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str, )
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal'})
     parser.add_argument('--dataset', default='MNIST', type=str,
