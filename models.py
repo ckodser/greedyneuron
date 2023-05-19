@@ -36,7 +36,6 @@ def forgetting_hook(module, grad_input, grad_output):
                 """
 
             f[torch.abs(f) < eps] = torch.mean(f)
-            module.plot_f(f)
             # if gradients are zero(f=0), then no matter how much we scale
             # this neuron is still not going to change its input
             # results in a numerical instability
@@ -76,7 +75,6 @@ def hook(module, grad_input, grad_output):
                 """
 
             f[torch.abs(f) < eps] = torch.mean(f)
-            module.plot_f(f)
             # if gradients are zero(f=0), then no matter how much we scale
             # this neuron is still not going to change its input
             # results in a numerical instability
