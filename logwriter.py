@@ -1,38 +1,24 @@
-# from torch.utils.tensorboard import SummaryWriter
 import datetime
-import wandb
 
-# Writer will output to ./runs/ directory by default
 writer = None
 max_step = 1
 writer_mode = None
-disable = False
 previous_epoch = -1
 task_id = 0
 forgetting_setting = False
 total_epoches = None
 
 def finsih():
-    wandb.finish(exit_code=0)
+    print("program ends")
 
-def start_writer(name, mode="tensorboard", dict=None, forgetting=False, epoches=None, steps=None):
-    if disable:
-        return
+def start_writer(forgetting=False, epoches=None, steps=None):
     if not forgetting:
         steps=1
     global writer, writer_mode, forgetting_setting, total_epoches, max_step
     total_epoches = epoches
     max_step= steps
     forgetting_setting = forgetting
-    writer_mode = mode
-    if mode == "tensorboard":
-        writer = SummaryWriter("runs/" + name + "_" + str(datetime.datetime.now()).replace(":", "."))
-    else:
-        import wandb
-        runwandb = wandb.init(
-            project="greedyNeuron6",
-            name=name,
-            config=dict)
+
 
 
 def iter_by_epoch(epoch, step):
@@ -53,16 +39,4 @@ def log(group, value, epoch, step=None, silent=False, translate=True):
         previous_epoch = epoch
         epoch=((epoch+task_id*total_epoches)/total_epoches)*200
 
-    if disable:
-        return
-    if translate:
-        iter = iter_by_epoch(epoch, step)
-    else:
-        iter = epoch
-    if writer_mode == "tensorboard":
-        writer.add_scalar(group, value, iter)
-    else:
-        wandb.log({group: value, 'epoch': epoch, 'batch': step})
-
-    if not silent:
-        print(f"{group}: {value}, epoch:{epoch} step:{step}")
+    print(f"{group}: {value}, epoch:{epoch} step:{step}")

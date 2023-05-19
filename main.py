@@ -11,22 +11,18 @@ import simpresnet
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_type', default='MLP', type=str,
-                        choices={'MLP', 'CNN', 'CNNWide', "LeNET", "ClassifierCNNShit", "ClassifierCNNDeep",
-                                 "resnet-18"})
+    parser.add_argument('--model_type', default='MLP', type=str, choices={'MLP', "LeNET"})
     parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str, )
-    parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal', 'intel', 'greedyExtraverts'})
+    parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal'})
     parser.add_argument('--dataset', default='MNIST', type=str,
-                        choices={'MNIST', "FashionMNIST", "cifar10", "cifar100"})
+                        choices={'MNIST' "cifar10"})
     parser.add_argument('--learning_rate', default=0.052, type=float)
     parser.add_argument('--batch_size', default=512, type=int)
     parser.add_argument('--number_of_worker', default=1, type=int)
     parser.add_argument('--num_epochs', default=25, type=int)
     parser.add_argument('--seed', default=0, type=int)
-    parser.add_argument('--run_name', default='not2', type=str)
+    parser.add_argument('--run_name', default='classification', type=str)
     parser.add_argument('--normalize', default='False', type=str)
-    parser.add_argument('--extravert_bias', default=0, type=float)
-    parser.add_argument('--extravert_mult', default=1 / 2, type=float)
     return parser.parse_args()
 
 
@@ -44,7 +40,6 @@ if __name__ == "__main__":
 
     print(c_run_name)
     run = args.run_name
-    noise_eps, pgd_eps, iters = 2, 0.5, 10
     config = {
         "learning_rate": lr,
         "epochs": epochs,
@@ -54,38 +49,20 @@ if __name__ == "__main__":
         "seed": args.seed,
         "model_type": args.model_type,
         "model_layers": args.model_layers,
-        "number_of_worker": args.number_of_worker,
-        "noise_eps": noise_eps,
-        "pgd_eps": pgd_eps,
-        "pgd_iters": iters,
+        "number_of_worker": args.number_of_worker
     }
-    start_writer(c_run_name, "wandb", config)
-    # start_writer(c_run_name, "tensorboard", config)
+    start_writer()
+
     # datasets
     trainDataloader, valDataloader, testDataloader, input_shape = datasets.get_dataloaders(dataset_name, batch_size,
                                                                                            args.seed)
 
     torch.manual_seed(args.seed)
 
-    if args.model_type == "CNN":
-        model = ClassifierCNN(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(
-            device)
-    if args.model_type == "CNNWide":
-        model = ClassifierCNNWide(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(
-            device)
-    if args.model_type == "ClassifierCNNShit":
-        model = ClassifierCNNShit(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(
-            device)
-    if args.model_type == "ClassifierCNNDeep":
-        model = ClassifierCNNDeep(input_shape[0], hidden_layers, 10, mode, args.extravert_mult, args.extravert_bias).to(
-            device)
     if args.model_type == "MLP":
-        model = ClassifierMLP(input_shape[0] * input_shape[1] * input_shape[2], hidden_layers, 10, mode,
-                              args.extravert_mult, args.extravert_bias).to(device)
+        model = ClassifierMLP(input_shape[0] * input_shape[1] * input_shape[2], hidden_layers, 10, mode).to(device)
     if args.model_type == "LeNET":
-        model = LeNet(10, mode, input_shape[0], args.extravert_mult, args.extravert_bias).to(device)
-    if args.model_type == "resnet-18":
-        model = simpresnet.resnet18(num_classes=10, normalize=(args.normalize == "True")).to(device)
+        model = LeNet(10, mode, input_shape[0]).to(device)
 
     loss_func = torch.nn.CrossEntropyLoss()
     for y in model.state_dict():
@@ -109,7 +86,6 @@ if __name__ == "__main__":
         logwriter.log("training_monitor/learning_rate", scheduler.get_last_lr()[0], epoch)
         avgloss = 0
         with tqdm(total=len(trainDataloader), position=0, leave=False) as pbar:
-            set_c_tracking(model, True)
             for step, (x, y) in enumerate(trainDataloader):
                 # forward pass
                 x, y = x.to(device), y.to(device)
@@ -125,15 +101,6 @@ if __name__ == "__main__":
                 avgloss += loss.detach().item()
 
                 logwriter.log("training_monitor/train_loss", loss, epoch, step, silent=True)
-                if step % 40 == 1:
-                    print(f"train_loss:{avgloss / 40}  epoch:{epoch}, batch:{step}")
-
-                    avgloss = 0
-
-                if step == 0:
-                    print("TRACK MODEL")
-                    set_c_tracking(model, False)
-                    track_model(model, epoch, step)
 
         scheduler.step()
         set_to_eval(model)
@@ -146,17 +113,7 @@ if __name__ == "__main__":
     set_to_eval(model)
     acc, loss = normal_eval(model, valDataloader, epoch, loss_func)
     acc, loss = normal_eval(model, testDataloader, epoch, loss_func, dataset_name="test")
-    strong_sparse_eval(model, testDataloader, loss_func, dataset_name="test")
-    noise_robust_eval(model, testDataloader, epoch, loss_func, 0.01, dataset_name, device="cuda", prefix="test")
-    noise_robust_eval(model, testDataloader, epoch, loss_func, 0.1, dataset_name, device="cuda", prefix="test")
-    noise_robust_eval(model, testDataloader, epoch, loss_func, 1, dataset_name, device="cuda", prefix="test")
-    noise_robust_eval(model, testDataloader, epoch, loss_func, 10, dataset_name, device="cuda", prefix="test")
 
     model.load_state_dict(best_model)
     acc, loss = normal_eval(model, testDataloader, epoch, loss_func, dataset_name="best_test")
-    strong_sparse_eval(model, testDataloader, loss_func, dataset_name="best_test")
-    noise_robust_eval(model, testDataloader, epoch, loss_func, 0.01, dataset_name, device="cuda", prefix="best_test")
-    noise_robust_eval(model, testDataloader, epoch, loss_func, 0.1, dataset_name, device="cuda", prefix="best_test")
-    noise_robust_eval(model, testDataloader, epoch, loss_func, 1, dataset_name, device="cuda", prefix="best_test")
-    noise_robust_eval(model, testDataloader, epoch, loss_func, 10, dataset_name, device="cuda", prefix="best_test")
     logwriter.finsih()
