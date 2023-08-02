@@ -93,7 +93,7 @@ if __name__ == "__main__":
         model = LeNet(10, mode, input_shape[0], args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "resnet-18":
         model = simpresnet.resnet18(num_classes=10, normalize=(args.normalize == "True"),
-                                    bias=(args.bias == "True")).to(device)
+                                    bias=(args.bias == "True"), mode=args.mode).to(device)
 
     loss_func = torch.nn.CrossEntropyLoss()
     for y in model.state_dict():
