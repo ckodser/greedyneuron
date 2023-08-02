@@ -41,7 +41,7 @@ def get_dataloaders(dataset_name, batch_size, seed, image_size):
                     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),  # Set the color params
                     ]
     }
-    input_shape = {'MNIST': [1, 28, 28], 'FashionMNIST': [1, 28, 28], 'cifar10': [3, 32, 32]}
+    input_shape = {'MNIST': [1, 28, 28], 'FashionMNIST': [1, 28, 28], 'cifar10': [3, image_size, image_size]}
 
     dataset_class = dataset_classes[dataset_name]
     default_transform = [transforms.ToTensor(),
