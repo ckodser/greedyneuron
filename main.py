@@ -13,7 +13,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_type', default='MLP', type=str,
                         choices={'MLP', 'CNN', 'CNNWide', "LeNET", "ClassifierCNNShit", "ClassifierCNNDeep",
-                                 "resnet-18"})
+                                 "resnet-18", "resnet-50"})
     parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str, )
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal', 'intel', 'greedyExtraverts'})
     parser.add_argument('--dataset', default='MNIST', type=str,
@@ -94,7 +94,9 @@ if __name__ == "__main__":
     if args.model_type == "resnet-18":
         model = simpresnet.resnet18(num_classes=10, normalize=(args.normalize == "True"),
                                     bias=(args.bias == "True"), mode=args.mode).to(device)
-
+    if args.model_type == "resnet-50":
+        model = simpresnet.resnet50(num_classes=10, normalize=(args.normalize == "True"),
+                                    bias=(args.bias == "True"), mode=args.mode).to(device)
     loss_func = torch.nn.CrossEntropyLoss()
     for y in model.state_dict():
         print(y, model.state_dict()[y].shape)
