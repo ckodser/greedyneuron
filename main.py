@@ -31,7 +31,8 @@ def get_args():
     parser.add_argument('--bias', default='False', type=str)
     parser.add_argument('--extravert_bias', default=0, type=float)
     parser.add_argument('--extravert_mult', default=1 / 2, type=float)
-    parser.add_argument('--image_size', default=32, type=int)
+    parser.add_argument('--image_size', default=32, type=int),
+    parser.add_argument('--num_classes', default=10, type=int)
     return parser.parse_args()
 
 
@@ -67,7 +68,8 @@ if __name__ == "__main__":
         "normalize": args.normalize == "True",
         "optimizer": args.optimizer,
         "weight_decay": args.weight_decay,
-        "image_size": args.image_size
+        "image_size": args.image_size,
+        "num_classes": args.num_classes
     }
     start_writer(c_run_name, "wandb", config)
     # start_writer(c_run_name, "tensorboard", config)
@@ -95,7 +97,7 @@ if __name__ == "__main__":
     if args.model_type == "LeNET":
         model = LeNet(10, mode, input_shape[0], args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "resnet-18":
-        model = simpresnet.resnet18(num_classes=10, normalize=(args.normalize == "True"),
+        model = simpresnet.resnet18(num_classes=args.num_classes, normalize=(args.normalize == "True"),
                                     bias=(args.bias == "True"), mode=args.mode).to(device)
     if args.model_type == "resnet-50":
         model = torchvision.models.resnet50(pretrained=False).to(device)
