@@ -30,6 +30,7 @@ def get_args():
     parser.add_argument('--bias', default='False', type=str)
     parser.add_argument('--extravert_bias', default=0, type=float)
     parser.add_argument('--extravert_mult', default=1 / 2, type=float)
+    parser.add_argument('--image_size', default=32, type=int)
     return parser.parse_args()
 
 
@@ -65,12 +66,13 @@ if __name__ == "__main__":
         "normalize": args.normalize == "True",
         "optimizer": args.optimizer,
         "weight_decay": args.weight_decay,
+        "image_size": args.image_size
     }
     start_writer(c_run_name, "wandb", config)
     # start_writer(c_run_name, "tensorboard", config)
     # datasets
     trainDataloader, valDataloader, testDataloader, input_shape = datasets.get_dataloaders(dataset_name, batch_size,
-                                                                                           args.seed)
+                                                                                           args.seed, args.image_size)
 
     torch.manual_seed(args.seed)
 

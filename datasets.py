@@ -14,7 +14,7 @@ import numpy as np
 from torchvision import transforms
 
 
-def get_dataloaders(dataset_name, batch_size, seed):
+def get_dataloaders(dataset_name, batch_size, seed, image_size):
     mean = {
         'MNIST': np.array([0.1307]),
         'FashionMNIST': np.array([0.2859]),
@@ -33,7 +33,7 @@ def get_dataloaders(dataset_name, batch_size, seed):
     train_transforms = {
         'MNIST': [transforms.RandomCrop(28, padding=1, padding_mode='edge')],
         'FashionMNIST': [transforms.RandomCrop(28, padding=1, padding_mode='edge')],
-        'cifar10': [transforms.Resize((32, 32)),  # resize the image
+        'cifar10': [transforms.Resize((image_size, image_size)),  # resize the image
                     transforms.RandomHorizontalFlip(),  # FLips the image w.r.t horizontal axis
                     transforms.RandomRotation(10),  # Rotates the image
                     transforms.RandomAffine(0, shear=10, scale=(0.8, 1.2)),
