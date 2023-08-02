@@ -15,12 +15,12 @@ def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, d
             mode: str = "normal") -> GConv2d:
     """3x3 convolution with padding"""
     return GConv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                   padding=dilation, bias=bias, mode=mode)
+                   padding=dilation, bias=False, mode=mode)
 
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1, bias: bool = True, mode: str = "normal") -> GConv2d:
     """1x1 convolution"""
-    return GConv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=bias, mode=mode)
+    return GConv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False, mode=mode)
 
 
 class BasicBlock(nn.Module):
@@ -179,7 +179,7 @@ class ResNet(nn.Module):
         if self.normalize:
             self.bn1 = norm_layer(self.inplanes)
         self.conv1 = GConv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
-                             bias=bias, mode=mode)
+                             bias=False, mode=mode)
         self.relu = nn.ReLU()
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0], bias=bias, mode=mode)
