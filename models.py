@@ -272,7 +272,8 @@ class GConv2d(nn.Module):
         self.mode = mode
         self.activation = activation
         if self.mode == "normal":
-            self.conv2d = torch.nn.Conv2d(input_feature, output_feature, kernel_size, stride, bias=bias)
+            self.conv2d = torch.nn.Conv2d(input_feature, output_feature, kernel_size,
+                                          stride=stride, padding=padding, bias=bias)
         if self.mode == "greedy":
             self.conv2d = GreedyConv2dPlain(input_feature, output_feature, kernel_size,
                                             stride=stride, padding=padding, bias=bias)
