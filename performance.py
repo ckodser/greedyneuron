@@ -22,6 +22,7 @@ def get_args():
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--run_name', default='not2', type=str)
     parser.add_argument('--normalize', default='False', type=str)
+    parser.add_argument('--bias', default='False', type=str)
     parser.add_argument('--extravert_bias', default=0, type=float)
     parser.add_argument('--extravert_mult', default=1 / 2, type=float)
     return parser.parse_args()
@@ -81,7 +82,7 @@ if __name__ == "__main__":
     if args.model_type == "LeNET":
         model = LeNet(10, mode, input_shape[0], args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "resnet-18":
-        model = simpresnet.resnet18(num_classes=10, normalize=(args.normalize == "True")).to(device)
+        model = simpresnet.resnet18(num_classes=10, normalize=(args.normalize == "True"), bias=(args.bias == "True")).to(device)
 
     loss_func = torch.nn.CrossEntropyLoss()
     for y in model.state_dict():

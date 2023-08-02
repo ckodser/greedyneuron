@@ -148,7 +148,7 @@ class GreedyConv2dPlain(nn.Module):
         A = F.conv2d(input, self.weight, torch.zeros(self.weight.shape[0], device=self.weight.device),
                      self.stride, self.padding)
         O = self.convGradChanger(A, input, self.weight)
-        return O + self.bias.view(1, -1, 1, 1) if self.has_bias else O
+        return (O + self.bias.view(1, -1, 1, 1)) if self.has_bias else O
 
 
 class GreedyConv2dPlainExtraverts(nn.Module):
@@ -178,7 +178,7 @@ class GreedyConv2dPlainExtraverts(nn.Module):
 
 
 class GreedyLinearPlain(nn.Module):
-    def __init__(self, input_feature, output_feature, residual_initialization=False):
+    def __init__(self, input_feature, output_feature, residual_initialization=False, bias: bool = True):
         """
         A linear layer follows the theories in the paper. (each neuron act as rational
         agent trying to maximize its utility).
@@ -189,7 +189,7 @@ class GreedyLinearPlain(nn.Module):
          it simulates a residual connection
         """
         super().__init__()
-
+        self.has_bias=bias
         linear = nn.Linear(input_feature, output_feature)
         self.weight = torch.nn.parameter.Parameter(data=linear.weight.clone().cuda(), requires_grad=True)
         self.bias = torch.nn.parameter.Parameter(data=linear.bias.clone().cuda(), requires_grad=True)
@@ -211,7 +211,7 @@ class GreedyLinearPlain(nn.Module):
     def forward(self, input):
         A = F.linear(input, self.weight, torch.zeros(self.weight.shape[0], device=self.weight.device), )
         O = self.linearGradChanger(A, input, self.weight)  # in value O is equal to A, however its grads are different
-        return O + self.bias.view(1, -1)
+        return (O + self.bias.view(1, -1)) if self.has_bias else O
 
 
 class GreedyLinearPlainExtraverts(GreedyLinearPlain):
@@ -231,7 +231,7 @@ class GreedyLinearPlainExtraverts(GreedyLinearPlain):
 
 
 class GLinear(nn.Module):
-    def __init__(self, input_size, output_size, mode="greedy", activation=None, extravert_mult=1, extravert_bias=0):
+    def __init__(self, input_size, output_size, mode="greedy", activation=None, extravert_mult=1, extravert_bias=0, bias: bool = True):
         """
         A linear Module
         :param input_size: input features
@@ -246,9 +246,9 @@ class GLinear(nn.Module):
         self.activation = activation
         self.output_size = output_size
         if self.mode == "normal":
-            self.linear = nn.Linear(input_size, output_size)
+            self.linear = nn.Linear(input_size, output_size, bias=bias)
         if self.mode == "greedy":
-            self.linear = GreedyLinearPlain(input_size, output_size)
+            self.linear = GreedyLinearPlain(input_size, output_size, bias=bias)
         if self.mode == "greedyExtraverts":
             self.linear = GreedyLinearPlainExtraverts(input_size, output_size, extravert_mult, extravert_bias)
 
@@ -265,7 +265,7 @@ class GLinear(nn.Module):
 
 
 class GConv2d(nn.Module):
-    def __init__(self, input_feature, output_feature, kernel_size, stride=1, padding=0, mode="greedy", bias=True,
+    def __init__(self, input_feature, output_feature, kernel_size, stride=1, padding=0, mode="greedy", bias: bool = True,
                  activation=None, extravert_mult=1, extravert_bias=0):
         super().__init__()
         assert mode in ["greedy", "normal", "intel"]
@@ -396,16 +396,16 @@ class ClassifierCNNShit(torch.nn.Module):
         return x * t
 
 
-def forward(self, x):
-    out = self.layer1(x)
-    out = self.layer2(out)
-    out = out.reshape(out.size(0), -1)
-    out = self.fc(out)
-    out = self.relu(out)
-    out = self.fc1(out)
-    out = self.relu1(out)
-    out = self.fc2(out)
-    return out
+# def forward(self, x):
+#     out = self.layer1(x)
+#     out = self.layer2(out)
+#     out = out.reshape(out.size(0), -1)
+#     out = self.fc(out)
+#     out = self.relu(out)
+#     out = self.fc1(out)
+#     out = self.relu1(out)
+#     out = self.fc2(out)
+#     return out
 
 
 class LeNet(torch.nn.Module):
