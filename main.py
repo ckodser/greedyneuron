@@ -59,6 +59,8 @@ if __name__ == "__main__":
         "noise_eps": noise_eps,
         "pgd_eps": pgd_eps,
         "pgd_iters": iters,
+        "bias": args.bias == "True",
+        "normalize": args.normalize == "True",
     }
     start_writer(c_run_name, "wandb", config)
     # start_writer(c_run_name, "tensorboard", config)
