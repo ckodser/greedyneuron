@@ -33,11 +33,11 @@ def get_dataloaders(dataset_name, batch_size, seed):
     train_transforms = {
         'MNIST': [transforms.RandomCrop(28, padding=1, padding_mode='edge')],
         'FashionMNIST': [transforms.RandomCrop(28, padding=1, padding_mode='edge')],
-        'cifar10': [transforms.Resize((32, 32)),  # resises the image so it can be perfect for our model.
+        'cifar10': [transforms.Resize((32, 32)),  # resize the image
                     transforms.RandomHorizontalFlip(),  # FLips the image w.r.t horizontal axis
-                    transforms.RandomRotation(10),  # Rotates the image to a specified angel
+                    transforms.RandomRotation(10),  # Rotates the image
                     transforms.RandomAffine(0, shear=10, scale=(0.8, 1.2)),
-                    # Performs actions like zooms, change shear angles.
+                    # Perform actions like zooms, change shear angles.
                     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),  # Set the color params
                     ]
     }

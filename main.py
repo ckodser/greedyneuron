@@ -19,6 +19,8 @@ def get_args():
     parser.add_argument('--dataset', default='MNIST', type=str,
                         choices={'MNIST', "FashionMNIST", "cifar10", "cifar100"})
     parser.add_argument('--learning_rate', default=0.052, type=float)
+    parser.add_argument('--weight_decay', default=0.0, type=float)
+    parser.add_argument('--optimizer', default='SGD', type=str)
     parser.add_argument('--batch_size', default=512, type=int)
     parser.add_argument('--number_of_worker', default=1, type=int)
     parser.add_argument('--num_epochs', default=25, type=int)
@@ -61,6 +63,8 @@ if __name__ == "__main__":
         "pgd_iters": iters,
         "bias": args.bias == "True",
         "normalize": args.normalize == "True",
+        "optimizer": args.optimizer,
+        "weight_decay": args.weight_decay,
     }
     start_writer(c_run_name, "wandb", config)
     # start_writer(c_run_name, "tensorboard", config)
@@ -88,7 +92,8 @@ if __name__ == "__main__":
     if args.model_type == "LeNET":
         model = LeNet(10, mode, input_shape[0], args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "resnet-18":
-        model = simpresnet.resnet18(num_classes=10, normalize=(args.normalize == "True"), bias=(args.bias == "True")).to(device)
+        model = simpresnet.resnet18(num_classes=10, normalize=(args.normalize == "True"),
+                                    bias=(args.bias == "True")).to(device)
 
     loss_func = torch.nn.CrossEntropyLoss()
     for y in model.state_dict():
@@ -99,7 +104,13 @@ if __name__ == "__main__":
     if "greedy" in mode:
         torch.nn.modules.module.register_module_full_backward_hook(hook)
     print(model)
-    optimizer = torch.optim.SGD(params=model.parameters(), lr=lr)
+    if args.optimizer == "SGD":
+        optimizer_function = torch.optim.SGD
+    elif args.optimizer == "Adam":
+        optimizer_function = torch.optim.Adam
+    else:
+        raise ValueError
+    optimizer = optimizer_function(params=model.parameters(), lr=lr, weight_decay=args.weight_decay)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, max(1, epochs // 2), gamma=0.1)
     set_name(model)
     epoch = 0
