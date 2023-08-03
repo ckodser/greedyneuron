@@ -9,6 +9,7 @@ import datasets
 import argparse
 import simpresnet
 from resnet32x32 import ResNet18 as resnet32
+from resnetcifar100 import resnet50 as resnet50cifar100
 
 
 def get_args():
@@ -107,11 +108,14 @@ if __name__ == "__main__":
         model = resnet32(mode=mode, class_num=args.num_classes).to(device)
 
     if args.model_type == "resnet-50":
-        if mode == "greedy":
-            model = simpresnet.resnet50(num_classes=10, normalize=(args.normalize == "True"),
-                                        bias=(args.bias == "True"), mode=args.mode).to(device)
-        elif mode == "normal":
-            model = torchvision.models.resnet50(pretrained=False, num_classes=args.num_classes).to(device)
+        if args.dataset == "cifar100":
+            model = resnet50cifar100(args.mode)
+        else:
+            if mode == "greedy":
+                model = simpresnet.resnet50(num_classes=10, normalize=(args.normalize == "True"),
+                                            bias=(args.bias == "True"), mode=args.mode).to(device)
+            elif mode == "normal":
+                model = torchvision.models.resnet50(pretrained=False, num_classes=args.num_classes).to(device)
 
     loss_func = torch.nn.CrossEntropyLoss()
     for y in model.state_dict():
@@ -142,7 +146,7 @@ if __name__ == "__main__":
         logwriter.log("training_monitor/learning_rate", scheduler.get_last_lr()[0], epoch)
         avgloss = 0
         with tqdm(total=len(trainDataloader), position=0, leave=False) as pbar:
-            if epoch in [0, epochs//2, epochs-1]:
+            if epoch in [0, epochs // 2, epochs - 1]:
                 set_c_tracking(model, True, epoch)
             for step, (x, y) in enumerate(trainDataloader):
                 # forward pass
