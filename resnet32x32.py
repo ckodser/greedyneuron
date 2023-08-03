@@ -16,7 +16,7 @@ class Conv(nn.Module):
         return self.b(x)
 
 
-class ResNet(nn.Module):
+class ResNet18(nn.Module):
     def __init__(self, mode, class_num):
         super().__init__()
         self.b1 = nn.Sequential(

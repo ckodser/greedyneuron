@@ -8,7 +8,7 @@ from logwriter import *
 import datasets
 import argparse
 import simpresnet
-from resnet32x32 import ResNet as resnet32
+from resnet32x32 import ResNet18 as resnet32
 
 
 def get_args():

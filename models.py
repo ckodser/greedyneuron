@@ -96,8 +96,11 @@ class LinearGradChanger(nn.Module):
             # c tracking
             score = torch.flatten(c)
             data = [[score[i]] for i in range(score.shape[0])]
-            table = wandb.Table(data=data, columns=["utility"])
-            wandb.log({f"c_tracking/w_{self.name}": wandb.plot.histogram(table, "value", title="c_tracking"), })
+            plt.hist(data, bins=20)
+            plt.title(f"{self.name}")
+            plt.show()
+            # table = wandb.Table(data=data, columns=["utility"])
+            # wandb.log({f"c_tracking/w_{self.name}": wandb.plot.histogram(table, "value", title="c_tracking"), })
 
     def forward(self, A, input, weight):
         B = F.linear(input, weight, torch.zeros(weight.shape[0], device=weight.device))  # in value B=A so (A+B)/2=A=B
