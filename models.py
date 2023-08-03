@@ -95,10 +95,10 @@ class LinearGradChanger(nn.Module):
             c = 1 / f
             # c tracking
             score = torch.flatten(c).cpu()
-            data = [[score[i]] for i in range(score.shape[0])]
-            plt.hist(data, bins=20)
-            plt.savefig(f"{self.name}_{self.current_epoch}.png")
-            print(f"save fig: {self.name}_{self.current_epoch}.png")
+            torch.save(score, f"T{self.name}_{self.current_epoch}")
+            # plt.hist(score, bins=20)
+            # plt.savefig(f"M{self.name}_{self.current_epoch}.png")
+            # print(f"save fig: M{self.name}_{self.current_epoch}.png")
             # plt.show()
             # table = wandb.Table(data=data, columns=["utility"])
             # wandb.log({f"c_tracking/w_{self.name}": wandb.plot.histogram(table, "value", title="c_tracking"), })
