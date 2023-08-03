@@ -36,7 +36,7 @@ dataset_classes = {
 }
 
 
-def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2):
+def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2, num_workers=1):
     train_transforms = {
         'MNIST': [transforms.RandomCrop(28, padding=1, padding_mode='edge')],
         'FashionMNIST': [transforms.RandomCrop(28, padding=1, padding_mode='edge')],
@@ -92,11 +92,11 @@ def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2):
 
     # build data loaders
     trainDataloader = DataLoader(trainDataset,
-                                 batch_size=batch_size, num_workers=1, sampler=None, shuffle=True, pin_memory=True)
+                                 batch_size=batch_size, num_workers=num_workers, sampler=None, shuffle=True, pin_memory=True)
     testDataloader = DataLoader(testDataset,
-                                batch_size=batch_size, num_workers=1, sampler=None, shuffle=True, pin_memory=True)
+                                batch_size=batch_size, num_workers=num_workers, sampler=None, shuffle=True, pin_memory=True)
     valDataloader = DataLoader(valDataset,
-                               batch_size=batch_size, num_workers=1, sampler=None, shuffle=True, pin_memory=True)
+                               batch_size=batch_size, num_workers=num_workers, sampler=None, shuffle=True, pin_memory=True)
 
     return trainDataloader, valDataloader, testDataloader, input_shape[dataset_name]
 

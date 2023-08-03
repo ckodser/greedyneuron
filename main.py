@@ -35,6 +35,7 @@ def get_args():
     parser.add_argument('--num_classes', default=10, type=int)
     parser.add_argument('--val_frac', default=0.2, type=float)
     parser.add_argument("--momentum", default=0.0, type=float)
+    parser.add_argument('--num_workers', default=1, type=int)
     return parser.parse_args()
 
 
@@ -79,7 +80,8 @@ if __name__ == "__main__":
     # datasets
     trainDataloader, valDataloader, testDataloader, input_shape = datasets.get_dataloaders(dataset_name, batch_size,
                                                                                            args.seed, args.image_size,
-                                                                                           val_frac=args.val_frac)
+                                                                                           val_frac=args.val_frac,
+                                                                                           num_workers=args.num_workers)
 
     torch.manual_seed(args.seed)
 
