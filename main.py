@@ -146,6 +146,7 @@ if __name__ == "__main__":
             for step, (x, y) in enumerate(trainDataloader):
                 # forward pass
                 x, y = x.to(device), y.to(device)
+                print("Shape", x.shape, y.shape)
                 optimizer.zero_grad()
                 model.zero_grad()
                 output = model(x)
