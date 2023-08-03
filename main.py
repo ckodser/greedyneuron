@@ -8,6 +8,7 @@ from logwriter import *
 import datasets
 import argparse
 import simpresnet
+from resnet32x32 import ResNet as resnet32
 
 
 def get_args():
@@ -107,15 +108,18 @@ if __name__ == "__main__":
             model = simpresnet.resnet18(num_classes=args.num_classes, normalize=(args.normalize == "True"),
                                         bias=(args.bias == "True"), mode=args.mode).to(device)
         elif mode == "normal":
-            model = torchvision.models.resnet18(pretrained=False, num_classes=args.num_classes).to(device)
             if args.image_size == 32:
-                model.conv1 = nn.Conv2d(
-                    in_channels=3,
-                    out_channels=64,
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                ).to(device)
+                model = resnet32().to(device)
+            else:
+                model = torchvision.models.resnet18(pretrained=False, num_classes=args.num_classes).to(device)
+                if args.image_size == 32:
+                    model.conv1 = nn.Conv2d(
+                        in_channels=3,
+                        out_channels=64,
+                        kernel_size=3,
+                        stride=1,
+                        padding=1,
+                    ).to(device)
 
     if args.model_type == "resnet-50":
         if mode == "greedy":
