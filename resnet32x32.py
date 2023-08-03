@@ -186,7 +186,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
         )
-        self.b10 = GLinear(input_size=50, output_size=class_num, bias=True)
+        self.b10 = GLinear(input_size=512, output_size=class_num, bias=True)
 
     def forward(self, x):
         x = self.b1(x)
