@@ -142,8 +142,8 @@ if __name__ == "__main__":
         logwriter.log("training_monitor/learning_rate", scheduler.get_last_lr()[0], epoch)
         avgloss = 0
         with tqdm(total=len(trainDataloader), position=0, leave=False) as pbar:
-            if epoch in [0, epoch//2, epoch]:
-                set_c_tracking(model, True)
+            if epoch in [0, epochs//2, epochs-1]:
+                set_c_tracking(model, True, epoch)
             for step, (x, y) in enumerate(trainDataloader):
                 # forward pass
                 x, y = x.to(device), y.to(device)

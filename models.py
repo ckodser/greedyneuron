@@ -48,7 +48,7 @@ def hook(module, grad_input, grad_output):
             # f_normalize = f / (
             #        math.sqrt(torch.sum(GA * GA) / (torch.sum(Gr * Gr) + eps)) + eps)
             # Grn = Go / (f_normalize + eps)
-            Grn=Gr/2
+            Grn = Gr / 2
             # Gr and Grn are same but they differ only by a scaler,
             # we want to keep norm of gradients similar to error-backpropagation
             if isinstance(module, LinearGradChangerExtraverts):
@@ -63,7 +63,7 @@ class ConvGradChanger(nn.Module):
         self.stride = stride
         self.padding = padding
         self.tracking = False
-        self.name=None
+        self.name = None
 
     def plot_f(self, f):
         if self.tracking:
@@ -97,7 +97,7 @@ class LinearGradChanger(nn.Module):
             score = torch.flatten(c).cpu()
             data = [[score[i]] for i in range(score.shape[0])]
             plt.hist(data, bins=20)
-            plt.savefig(f"{self.name}.png")
+            plt.savefig(f"{self.name}_{self.current_epoch}.png")
             # plt.show()
             # table = wandb.Table(data=data, columns=["utility"])
             # wandb.log({f"c_tracking/w_{self.name}": wandb.plot.histogram(table, "value", title="c_tracking"), })
@@ -192,7 +192,7 @@ class GreedyLinearPlain(nn.Module):
          it simulates a residual connection
         """
         super().__init__()
-        self.has_bias=bias
+        self.has_bias = bias
         linear = nn.Linear(input_feature, output_feature)
         self.weight = torch.nn.parameter.Parameter(data=linear.weight.clone().cuda(), requires_grad=True)
         self.bias = torch.nn.parameter.Parameter(data=linear.bias.clone().cuda(), requires_grad=True)
@@ -234,7 +234,8 @@ class GreedyLinearPlainExtraverts(GreedyLinearPlain):
 
 
 class GLinear(nn.Module):
-    def __init__(self, input_size, output_size, mode="greedy", activation=None, extravert_mult=1, extravert_bias=0, bias: bool = True):
+    def __init__(self, input_size, output_size, mode="greedy", activation=None, extravert_mult=1, extravert_bias=0,
+                 bias: bool = True):
         """
         A linear Module
         :param input_size: input features
@@ -268,7 +269,8 @@ class GLinear(nn.Module):
 
 
 class GConv2d(nn.Module):
-    def __init__(self, input_feature, output_feature, kernel_size, stride=1, padding=0, mode="greedy", bias: bool = True,
+    def __init__(self, input_feature, output_feature, kernel_size, stride=1, padding=0, mode="greedy",
+                 bias: bool = True,
                  activation=None, extravert_mult=1, extravert_bias=0):
         super().__init__()
         assert mode in ["greedy", "normal", "intel"]
@@ -454,13 +456,14 @@ def set_to_train(model):
     model.train()
 
 
-def set_c_tracking(model, value):
+def set_c_tracking(model, value, epoch=0):
     for name, module in model.named_children():
         if isinstance(module, LinearGradChanger) or isinstance(module, ConvGradChanger):
             module.tracking = value
+            module.current_epoch = epoch
             print(name, " -> ", value)
         else:
-            set_c_tracking(module, value)
+            set_c_tracking(module, value, epoch)
 
 
 def set_name(model, prefix=""):
