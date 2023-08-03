@@ -1,5 +1,6 @@
 import torch
 import torchvision.models
+import winnt
 from tqdm import tqdm
 import logwriter
 from models import *
@@ -105,14 +106,14 @@ if __name__ == "__main__":
             model = simpresnet.resnet18(num_classes=args.num_classes, normalize=(args.normalize == "True"),
                                         bias=(args.bias == "True"), mode=args.mode).to(device)
         elif mode == "normal":
-            model = torchvision.models.resnet18(pretrained=False).to(device)
+            model = torchvision.models.resnet18(pretrained=False, num_classes=args.num_classes).to(device)
 
     if args.model_type == "resnet-50":
         if mode == "greedy":
             model = simpresnet.resnet50(num_classes=10, normalize=(args.normalize == "True"),
                                         bias=(args.bias == "True"), mode=args.mode).to(device)
         elif mode == "normal":
-            model = torchvision.models.resnet50(pretrained=False).to(device)
+            model = torchvision.models.resnet50(pretrained=False, num_classes=args.num_classes).to(device)
 
     loss_func = torch.nn.CrossEntropyLoss()
     for y in model.state_dict():
