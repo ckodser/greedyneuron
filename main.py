@@ -1,6 +1,5 @@
 import torch
 import torchvision.models
-import winnt
 from tqdm import tqdm
 import logwriter
 from models import *
