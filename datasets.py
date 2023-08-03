@@ -70,7 +70,7 @@ def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2, nu
                          transforms.Normalize(mean[dataset_name], std[dataset_name])]
 
     train_transform = transforms.Compose(train_transforms[dataset_name] + default_transform)
-    test_transform = transforms.Compose(default_transform)
+    test_transform = transforms.Compose([transforms.Resize((image_size, image_size))]+default_transform)
     # build data sets
     trainDataset = dataset_class(root="./data", train=True, transform=train_transform, download=True)
     valDataset = dataset_class(root="./data", train=True, transform=test_transform, download=True)
