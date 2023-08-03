@@ -104,11 +104,7 @@ if __name__ == "__main__":
     if args.model_type == "LeNET":
         model = LeNet(10, mode, input_shape[0], args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "resnet-18":
-        if mode == "greedy":
-            model = simpresnet.resnet18(num_classes=args.num_classes, normalize=(args.normalize == "True"),
-                                        bias=(args.bias == "True"), mode=args.mode).to(device)
-        elif mode == "normal":
-            model = resnet32(mode=mode, class_num=args.class_num).to(device)
+        model = resnet32(mode=mode, class_num=args.class_num).to(device)
 
     if args.model_type == "resnet-50":
         if mode == "greedy":
