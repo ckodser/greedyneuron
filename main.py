@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     if args.model_type == "resnet-50":
         if args.dataset == "cifar100":
-            model = resnet50cifar100(args.mode)
+            model = resnet50cifar100(args.mode).to(device)
         else:
             if mode == "greedy":
                 model = simpresnet.resnet50(num_classes=10, normalize=(args.normalize == "True"),
