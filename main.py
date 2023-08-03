@@ -18,7 +18,7 @@ def get_args():
     parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str, )
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal', 'intel', 'greedyExtraverts'})
     parser.add_argument('--dataset', default='MNIST', type=str,
-                        choices={'MNIST', "FashionMNIST", "cifar10", "cifar100"})
+                        choices={'MNIST', "FashionMNIST", "cifar10", "cifar100", 'cifar10-90'})
     parser.add_argument('--learning_rate', default=0.052, type=float)
     parser.add_argument('--weight_decay', default=0.0, type=float)
     parser.add_argument('--optimizer', default='SGD', type=str)
@@ -31,8 +31,10 @@ def get_args():
     parser.add_argument('--bias', default='False', type=str)
     parser.add_argument('--extravert_bias', default=0, type=float)
     parser.add_argument('--extravert_mult', default=1 / 2, type=float)
-    parser.add_argument('--image_size', default=32, type=int),
+    parser.add_argument('--image_size', default=32, type=int)
     parser.add_argument('--num_classes', default=10, type=int)
+    parser.add_argument('--val_frac', default=0.2, type=float)
+    parser.add_argument("--momentum", default=0.0, type=float)
     return parser.parse_args()
 
 
@@ -69,13 +71,15 @@ if __name__ == "__main__":
         "optimizer": args.optimizer,
         "weight_decay": args.weight_decay,
         "image_size": args.image_size,
-        "num_classes": args.num_classes
+        "num_classes": args.num_classes,
+        "momentum": args.momentum
     }
     start_writer(c_run_name, "wandb", config)
     # start_writer(c_run_name, "tensorboard", config)
     # datasets
     trainDataloader, valDataloader, testDataloader, input_shape = datasets.get_dataloaders(dataset_name, batch_size,
-                                                                                           args.seed, args.image_size)
+                                                                                           args.seed, args.image_size,
+                                                                                           val_frac=args.val_frac)
 
     torch.manual_seed(args.seed)
 
@@ -97,12 +101,19 @@ if __name__ == "__main__":
     if args.model_type == "LeNET":
         model = LeNet(10, mode, input_shape[0], args.extravert_mult, args.extravert_bias).to(device)
     if args.model_type == "resnet-18":
-        model = simpresnet.resnet18(num_classes=args.num_classes, normalize=(args.normalize == "True"),
-                                    bias=(args.bias == "True"), mode=args.mode).to(device)
+        if mode == "greedy":
+            model = simpresnet.resnet18(num_classes=args.num_classes, normalize=(args.normalize == "True"),
+                                        bias=(args.bias == "True"), mode=args.mode).to(device)
+        elif mode == "normal":
+            model = torchvision.models.resnet18(pretrained=False).to(device)
+
     if args.model_type == "resnet-50":
-        model = torchvision.models.resnet50(pretrained=False).to(device)
-        # model = simpresnet.resnet50(num_classes=10, normalize=(args.normalize == "True"),
-        #                             bias=(args.bias == "True"), mode=args.mode).to(device)
+        if mode == "greedy":
+            model = simpresnet.resnet50(num_classes=10, normalize=(args.normalize == "True"),
+                                        bias=(args.bias == "True"), mode=args.mode).to(device)
+        elif mode == "normal":
+            model = torchvision.models.resnet50(pretrained=False).to(device)
+
     loss_func = torch.nn.CrossEntropyLoss()
     for y in model.state_dict():
         print(y, model.state_dict()[y].shape)
@@ -118,7 +129,8 @@ if __name__ == "__main__":
         optimizer_function = torch.optim.Adam
     else:
         raise ValueError
-    optimizer = optimizer_function(params=model.parameters(), lr=lr, weight_decay=args.weight_decay)
+    optimizer = optimizer_function(params=model.parameters(), lr=lr, weight_decay=args.weight_decay,
+                                   momentum=args.momentum)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, max(1, epochs // 2), gamma=0.1)
     set_name(model)
     epoch = 0
