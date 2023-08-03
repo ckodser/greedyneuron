@@ -1,19 +1,14 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
+from models import GLinear, GConv2d
 
 class Conv(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding):
+    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, mode):
         super().__init__()
         self.b = nn.Sequential(
-            nn.Conv2d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kernel_size,
-                stride=stride,
-                padding=padding,
-                bias=False,
-            ),
+            GConv2d(input_feature=in_channels, output_feature=out_channels, kernel_size=kernel_size,
+                    stride=stride, padding=padding, bias=False, mode=mode),
             nn.BatchNorm2d(out_channels),
         )
 
@@ -22,10 +17,10 @@ class Conv(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self):
+    def __init__(self, mode, class_num):
         super().__init__()
         self.b1 = nn.Sequential(
-            Conv(
+            Conv(mode=mode,
                 in_channels=3,
                 out_channels=64,
                 kernel_size=3,
@@ -35,7 +30,7 @@ class ResNet(nn.Module):
             nn.ReLU(),
         )
         self.b2 = nn.Sequential(
-            Conv(
+            Conv(mode=mode,
                 in_channels=64,
                 out_channels=64,
                 kernel_size=3,
@@ -43,7 +38,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
             nn.ReLU(),
-            Conv(
+            Conv(mode=mode,
                 in_channels=64,
                 out_channels=64,
                 kernel_size=3,
@@ -52,7 +47,7 @@ class ResNet(nn.Module):
             )
         )
         self.b3 = nn.Sequential(
-            Conv(
+            Conv(mode=mode,
                 in_channels=64,
                 out_channels=64,
                 kernel_size=3,
@@ -60,7 +55,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
             nn.ReLU(),
-            Conv(
+            Conv(mode=mode,
                 in_channels=64,
                 out_channels=64,
                 kernel_size=3,
@@ -69,7 +64,7 @@ class ResNet(nn.Module):
             )
         )
         self.b4 = nn.Sequential(
-            Conv(
+            Conv(mode=mode,
                 in_channels=64,
                 out_channels=128,
                 kernel_size=3,
@@ -77,7 +72,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
             nn.ReLU(),
-            Conv(
+            Conv(mode=mode,
                 in_channels=128,
                 out_channels=128,
                 kernel_size=3,
@@ -85,7 +80,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
         )
-        self.b4_x = Conv(
+        self.b4_x = Conv(mode=mode,
             in_channels=64,
             out_channels=128,
             kernel_size=1,
@@ -93,7 +88,7 @@ class ResNet(nn.Module):
             padding=0,
         )
         self.b5 = nn.Sequential(
-            Conv(
+            Conv(mode=mode,
                 in_channels=128,
                 out_channels=128,
                 kernel_size=3,
@@ -101,7 +96,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
             nn.ReLU(),
-            Conv(
+            Conv(mode=mode,
                 in_channels=128,
                 out_channels=128,
                 kernel_size=3,
@@ -110,7 +105,7 @@ class ResNet(nn.Module):
             ),
         )
         self.b6 = nn.Sequential(
-            Conv(
+            Conv(mode=mode,
                 in_channels=128,
                 out_channels=256,
                 kernel_size=3,
@@ -118,7 +113,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
             nn.ReLU(),
-            Conv(
+            Conv(mode=mode,
                 in_channels=256,
                 out_channels=256,
                 kernel_size=3,
@@ -126,7 +121,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
         )
-        self.b6_x = Conv(
+        self.b6_x = Conv(mode=mode,
             in_channels=128,
             out_channels=256,
             kernel_size=1,
@@ -134,7 +129,7 @@ class ResNet(nn.Module):
             padding=0,
         )
         self.b7 = nn.Sequential(
-            Conv(
+            Conv(mode=mode,
                 in_channels=256,
                 out_channels=256,
                 kernel_size=3,
@@ -142,7 +137,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
             nn.ReLU(),
-            Conv(
+            Conv(mode=mode,
                 in_channels=256,
                 out_channels=256,
                 kernel_size=3,
@@ -151,7 +146,7 @@ class ResNet(nn.Module):
             ),
         )
         self.b8 = nn.Sequential(
-            Conv(
+            Conv(mode=mode,
                 in_channels=256,
                 out_channels=512,
                 kernel_size=3,
@@ -159,7 +154,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
             nn.ReLU(),
-            Conv(
+            Conv(mode=mode,
                 in_channels=512,
                 out_channels=512,
                 kernel_size=3,
@@ -167,7 +162,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
         )
-        self.b8_x = Conv(
+        self.b8_x = Conv(mode=mode,
             in_channels=256,
             out_channels=512,
             kernel_size=1,
@@ -175,7 +170,7 @@ class ResNet(nn.Module):
             padding=0,
         )
         self.b9 = nn.Sequential(
-            Conv(
+            Conv(mode=mode,
                 in_channels=512,
                 out_channels=512,
                 kernel_size=3,
@@ -183,7 +178,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
             nn.ReLU(),
-            Conv(
+            Conv(mode=mode,
                 in_channels=512,
                 out_channels=512,
                 kernel_size=3,
@@ -191,7 +186,7 @@ class ResNet(nn.Module):
                 padding=1,
             ),
         )
-        self.b10 = nn.Linear(512, 10)
+        self.b10 = GLinear(input_size=50, output_size=class_num, bias=True)
 
     def forward(self, x):
         x = self.b1(x)
