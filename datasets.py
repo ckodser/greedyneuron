@@ -50,17 +50,14 @@ def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2, nu
         'cifar10-90': [transforms.RandomCrop(image_size, padding=4),
                        transforms.RandomHorizontalFlip(),
                        ],
-        'cifar100': [transforms.Resize((image_size, image_size)),  # resize the image
-                     transforms.RandomHorizontalFlip(),  # FLips the image w.r.t horizontal axis
-                     transforms.RandomRotation(10),  # Rotates the image
-                     transforms.RandomAffine(0, shear=10, scale=(0.8, 1.2)),
-                     # Perform actions like zooms, change shear angles.
-                     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),  # Set the color params
+        'cifar100': [transforms.RandomCrop(32, padding=4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.RandomRotation(15),
                      ],
 
     }
     input_shape = {'MNIST': [1, 28, 28], 'FashionMNIST': [1, 28, 28], 'cifar10': [3, image_size, image_size],
-                   'cifar10-90': [3, image_size, image_size], 'cifar100': [3, image_size, image_size]}
+                   'cifar10-90': [3, image_size, image_size], 'cifar100': [3, 32, 32]}
 
 
 
