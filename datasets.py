@@ -34,33 +34,37 @@ dataset_classes = {
     'cifar10-90': torchvision.datasets.CIFAR10,
     'cifar100': torchvision.datasets.CIFAR100
 }
-train_transforms = {
-    'MNIST': [transforms.RandomCrop(28, padding=1, padding_mode='edge')],
-    'FashionMNIST': [transforms.RandomCrop(28, padding=1, padding_mode='edge')],
-    'cifar10': [transforms.Resize((32, 32)),  # resize the image
-                transforms.RandomHorizontalFlip(),  # FLips the image w.r.t horizontal axis
-                transforms.RandomRotation(10),  # Rotates the image
-                transforms.RandomAffine(0, shear=10, scale=(0.8, 1.2)),
-                # Perform actions like zooms, change shear angles.
-                transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),  # Set the color params
-                ],
-    'cifar10-90': [transforms.RandomCrop(32, padding=4),
-                   transforms.RandomHorizontalFlip(),
-                   ],
-    'cifar100': [transforms.Resize((32, 32)),  # resize the image
-                 transforms.RandomHorizontalFlip(),  # FLips the image w.r.t horizontal axis
-                 transforms.RandomRotation(10),  # Rotates the image
-                 transforms.RandomAffine(0, shear=10, scale=(0.8, 1.2)),
-                 # Perform actions like zooms, change shear angles.
-                 transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),  # Set the color params
-                 ],
-
-}
-input_shape = {'MNIST': [1, 28, 28], 'FashionMNIST': [1, 28, 28], 'cifar10': [3, 32, 32], 'cifar10-90': [3, 32, 32],
-               'cifar100': [3, 32, 32]}
 
 
 def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2):
+    train_transforms = {
+        'MNIST': [transforms.RandomCrop(28, padding=1, padding_mode='edge')],
+        'FashionMNIST': [transforms.RandomCrop(28, padding=1, padding_mode='edge')],
+        'cifar10': [transforms.Resize((image_size, image_size)),  # resize the image
+                    transforms.RandomHorizontalFlip(),  # FLips the image w.r.t horizontal axis
+                    transforms.RandomRotation(10),  # Rotates the image
+                    transforms.RandomAffine(0, shear=10, scale=(0.8, 1.2)),
+                    # Perform actions like zooms, change shear angles.
+                    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),  # Set the color params
+                    ],
+        'cifar10-90': [transforms.Resize((image_size, image_size)),
+                       transforms.RandomCrop(image_size, padding=4*224/32),
+                       transforms.RandomHorizontalFlip(),
+                       ],
+        'cifar100': [transforms.Resize((image_size, image_size)),  # resize the image
+                     transforms.RandomHorizontalFlip(),  # FLips the image w.r.t horizontal axis
+                     transforms.RandomRotation(10),  # Rotates the image
+                     transforms.RandomAffine(0, shear=10, scale=(0.8, 1.2)),
+                     # Perform actions like zooms, change shear angles.
+                     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),  # Set the color params
+                     ],
+
+    }
+    input_shape = {'MNIST': [1, 28, 28], 'FashionMNIST': [1, 28, 28], 'cifar10': [3, image_size, image_size],
+                   'cifar10-90': [3, image_size, image_size], 'cifar100': [3, image_size, image_size]}
+
+
+
     dataset_class = dataset_classes[dataset_name]
     default_transform = [transforms.ToTensor(),
                          transforms.Normalize(mean[dataset_name], std[dataset_name])]
