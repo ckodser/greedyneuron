@@ -38,6 +38,7 @@ def get_args():
     parser.add_argument('--val_frac', default=0.2, type=float)
     parser.add_argument("--momentum", default=0.0, type=float)
     parser.add_argument('--num_workers', default=1, type=int)
+    parser.add_argument('--tracking', default="False", type=str)
     return parser.parse_args()
 
 
@@ -147,7 +148,7 @@ if __name__ == "__main__":
         avgloss = 0
         with tqdm(total=len(trainDataloader), position=0, leave=False) as pbar:
             if epoch in [0, epochs // 2, epochs - 1]:
-                set_c_tracking(model, True, epoch)
+                set_c_tracking(model, args.tracking == "True", epoch)
             for step, (x, y) in enumerate(trainDataloader):
                 # forward pass
                 x, y = x.to(device), y.to(device)
