@@ -47,8 +47,7 @@ def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2, nu
                     # Perform actions like zooms, change shear angles.
                     transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),  # Set the color params
                     ],
-        'cifar10-90': [transforms.Resize((image_size, image_size)),
-                       transforms.RandomCrop(image_size, padding=4*224/32),
+        'cifar10-90': [transforms.RandomCrop(image_size, padding=4),
                        transforms.RandomHorizontalFlip(),
                        ],
         'cifar100': [transforms.Resize((image_size, image_size)),  # resize the image
@@ -66,11 +65,12 @@ def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2, nu
 
 
     dataset_class = dataset_classes[dataset_name]
-    default_transform = [transforms.ToTensor(),
+    default_transform = [transforms.Resize((image_size, image_size)),
+                         transforms.ToTensor(),
                          transforms.Normalize(mean[dataset_name], std[dataset_name])]
 
     train_transform = transforms.Compose(train_transforms[dataset_name] + default_transform)
-    test_transform = transforms.Compose([transforms.Resize((image_size, image_size))]+default_transform)
+    test_transform = transforms.Compose(default_transform)
     # build data sets
     trainDataset = dataset_class(root="./data", train=True, transform=train_transform, download=True)
     valDataset = dataset_class(root="./data", train=True, transform=test_transform, download=True)
