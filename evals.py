@@ -128,7 +128,6 @@ def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True
         for step, (x, y) in enumerate(testDataloader):
             # forward pass
             x, y = x.to(device), y.to(device)
-            print("Shape", x.shape, y.shape)
             output = model(x)
             loss_c = loss_func(output, y)
             output = torch.argmax(output, dim=1)

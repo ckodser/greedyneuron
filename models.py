@@ -94,7 +94,7 @@ class LinearGradChanger(nn.Module):
         if self.tracking:
             c = 1 / f
             # c tracking
-            score = torch.flatten(c)
+            score = torch.flatten(c).cpu()
             data = [[score[i]] for i in range(score.shape[0])]
             plt.hist(data, bins=20)
             plt.title(f"{self.name}")
