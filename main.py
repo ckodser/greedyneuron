@@ -23,6 +23,7 @@ def get_args():
                         choices={'MNIST', "FashionMNIST", "cifar10", "cifar100", 'cifar10-90'})
     parser.add_argument('--learning_rate', default=0.052, type=float)
     parser.add_argument('--weight_decay', default=0.0, type=float)
+    parser.add_argument('--lr_scheduler', default="step", type=str)
     parser.add_argument('--optimizer', default='SGD', type=str)
     parser.add_argument('--batch_size', default=512, type=int)
     parser.add_argument('--number_of_worker', default=1, type=int)
@@ -76,7 +77,8 @@ if __name__ == "__main__":
         "weight_decay": args.weight_decay,
         "image_size": args.image_size,
         "num_classes": args.num_classes,
-        "momentum": args.momentum
+        "momentum": args.momentum,
+        "lr_scheduler": args.lr_scheduler
     }
     start_writer(c_run_name, "wandb", config)
     # start_writer(c_run_name, "tensorboard", config)
@@ -135,7 +137,10 @@ if __name__ == "__main__":
         raise ValueError
     optimizer = optimizer_function(params=model.parameters(), lr=lr, weight_decay=args.weight_decay,
                                    momentum=args.momentum)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, max(1, epochs // 2), gamma=0.1)
+    if args.lr_scheduler =="cos":
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, epochs)
+    elif args.lr_scheduler == "step":
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, max(1, epochs // 2), gamma=0.1)
     set_name(model)
     epoch = 0
     best_model = {}
