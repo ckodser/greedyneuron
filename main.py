@@ -160,6 +160,7 @@ if __name__ == "__main__":
                 optimizer.zero_grad()
                 model.zero_grad()
                 output = model(x)
+                print("one batch:", output.shape, y.shape, torch.min(y), torch.max(y))
                 loss = loss_func(output, y)
                 loss.backward()
                 optimizer.step()
