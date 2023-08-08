@@ -148,10 +148,10 @@ def resnet34(mode):
 def resnet50(mode, length=10000):
     """ return a ResNet 50 object
     """
-    num_blocks=[3, 4, 6, 3]
+    num_blocks = [3, 4, 6, 3]
     for i in range(len(num_blocks)):
-        num_blocks[i]=min(num_blocks[i], length)
-        length-=num_blocks[i]
+        num_blocks[i] = min(num_blocks[i], length)
+        length -= num_blocks[i]
 
     return ResNet(mode, BottleNeck, num_blocks)
 
