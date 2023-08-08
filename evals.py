@@ -129,6 +129,7 @@ def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True
             # forward pass
             x, y = x.to(device), y.to(device)
             output = model(x)
+            print("`eval one batch:", output.shape, y.shape, torch.min(y), torch.max(y))
             loss_c = loss_func(output, y)
             output = torch.argmax(output, dim=1)
             loss += loss_c.detach().item()
