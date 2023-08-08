@@ -141,6 +141,9 @@ if __name__ == "__main__":
         scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, epochs)
     elif args.lr_scheduler == "step":
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, max(1, epochs // 2), gamma=0.1)
+    elif args.lr_scheduler == "cifar100":
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[60,120,160], gamma=0.2)
+
     set_name(model)
     epoch = 0
     best_model = {}
