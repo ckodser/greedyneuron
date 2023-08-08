@@ -40,7 +40,7 @@ def hook(module, grad_input, grad_output):
                 """
 
             f[torch.abs(f) < eps] = torch.mean(f)
-            module.plot_f(f)
+            module.plot_f(f, GA)
             # if gradients are zero(f=0), then no matter how much we scale
             # this neuron is still not going to change its input
             # results in a numerical instability
@@ -65,7 +65,7 @@ class ConvGradChanger(nn.Module):
         self.tracking = False
         self.name = None
 
-    def plot_f(self, f):
+    def plot_f(self, f, raw_grad):
         if self.tracking:
             c = 1 / f
             # c tracking
@@ -90,12 +90,13 @@ class LinearGradChanger(nn.Module):
         self.tracking = False
         self.name = None
 
-    def plot_f(self, f):
+    def plot_f(self, f, raw_grad):
         if self.tracking:
             c = 1 / f
             # c tracking
             score = torch.flatten(c).cpu()
             torch.save(score, f"T{self.name}_{self.current_epoch}")
+            torch.save(raw_grad ,f"Grad{self.name}_{self.current_epoch}")
             # plt.hist(score, bins=20)
             # plt.savefig(f"M{self.name}_{self.current_epoch}.png")
             # print(f"save fig: M{self.name}_{self.current_epoch}.png")

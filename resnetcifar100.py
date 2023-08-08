@@ -95,7 +95,12 @@ class ResNet(nn.Module):
         self.conv4_x = self._make_layer(mode, block, 256, num_block[2], 2)
         self.conv5_x = self._make_layer(mode, block, 512, num_block[3], 2)
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = GLinear(512 * block.expansion, num_classes, bias=True, mode=mode)
+
+        last = 0
+        for i in range(len(num_block)):
+            if num_block[i] != 0:
+                last = i
+        self.fc = GLinear(64*(2**last) * block.expansion, num_classes, bias=True, mode=mode)
 
     def _make_layer(self, mode, block, out_channels, num_blocks, stride):
         """make resnet layers(by layer i didnt mean this 'layer' was the
@@ -111,7 +116,8 @@ class ResNet(nn.Module):
         Return:
             return a resnet layer
         """
-
+        if num_blocks == 0:
+            return lambda x: x
         # we have num_block blocks per layer, the first block
         # could be 1 or 2, other blocks would always be 1
         strides = [stride] + [1] * (num_blocks - 1)
@@ -144,10 +150,15 @@ def resnet34(mode):
     """
     return ResNet(mode, BasicBlock, [3, 4, 6, 3])
 
-def resnet50(mode):
+def resnet50(mode, length=10000):
     """ return a ResNet 50 object
     """
-    return ResNet(mode, BottleNeck, [3, 4, 6, 3])
+    num_blocks = [3, 4, 6, 3]
+    for i in range(len(num_blocks)):
+        num_blocks[i] = min(num_blocks[i], length)
+        length -= num_blocks[i]
+
+    return ResNet(mode, BottleNeck, num_blocks)
 
 def resnet101(mode):
     """ return a ResNet 101 object
