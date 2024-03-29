@@ -78,7 +78,7 @@ dataset_classes = {
     'FashionMNIST': torchvision.datasets.FashionMNIST,
     'cifar10': torchvision.datasets.CIFAR10,
     'cifar10-90': torchvision.datasets.CIFAR10,
-    'cifar100': torchvision.datasets.CIFAR100
+    'cifar100': torchvision.datasets.CIFAR100,
     'tinyImagenet': TinyImageNet,
 }
 
