@@ -113,7 +113,7 @@ if __name__ == "__main__":
     if args.model_type == "resnet-50":
         if args.dataset == "cifar100":
             model = resnet50cifar100(args.mode, int(args.model_layers)).to(device)
-        elif args.dataset == "tinyimagenet":
+        elif args.dataset == "tinyImagenet":
             model = resnet50tinyImagenet(args.mode, int(args.model_layers)).to(device)
         else:
             if mode == "greedy":
