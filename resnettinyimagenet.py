@@ -134,13 +134,13 @@ class ResNet(nn.Module):
         output = self.conv3_x(output)
         output = self.conv4_x(output)
         output = self.conv5_x(output)
-        print("ICML reb1", output.shape)
+        # print("ICML reb1", output.shape)
         output = self.avg_pool(output)
-        print("ICML reb2", output.shape)
+        # print("ICML reb2", output.shape)
         output = output.view(output.size(0), -1)
-        print("ICML reb3", output.shape)
+        # print("ICML reb3", output.shape)
         output = self.fc(output)
-        print("ICML reb4", output.shape)
+        # print("ICML reb4", output.shape)
         return output
 
 def resnet18(mode):
