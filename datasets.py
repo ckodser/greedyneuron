@@ -13,19 +13,65 @@ from torch.utils.data import (
 import numpy as np
 from torchvision import transforms
 
+import os
+import urllib.request
+import zipfile
+import shutil
+from torch.utils.data import Dataset
+from torchvision.datasets import ImageFolder
+
+class TinyImageNet(Dataset):
+    def __init__(self, root="./data", train=True, transform=None, download=True):
+        super().__init__()
+
+        self.root = root
+        self.train = train
+        self.transform = transform
+
+        self.data_dir = os.path.join(self.root, "tiny-imagenet-200")
+
+        if download:
+            self.download()
+
+        self.dataset = ImageFolder(root=os.path.join(self.data_dir, "tiny-imagenet-200", "train" if self.train else "val"), transform=self.transform)
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, index):
+        return self.dataset[index]
+
+    def download(self):
+        if not os.path.exists(self.data_dir):
+            os.makedirs(self.data_dir)
+
+        archive_path = os.path.join("/tmp", "tiny-imagenet-200.zip")
+
+        # Download the dataset
+        urllib.request.urlretrieve("http://cs231n.stanford.edu/tiny-imagenet-200.zip", archive_path)
+
+        # Extract the downloaded archive
+        with zipfile.ZipFile(archive_path, 'r') as zip_ref:
+            zip_ref.extractall(self.data_dir)
+
+        # Remove the downloaded archive
+        os.remove(archive_path)
+
 mean = {
     'MNIST': np.array([0.1307]),
     'FashionMNIST': np.array([0.2859]),
     'cifar10': np.array([0.49139968, 0.48215827, 0.44653124]),
     'cifar10-90': np.array([0.49139968, 0.48215827, 0.44653124]),
-    'cifar100': np.array([0.5071, 0.4867, 0.4408])
+    'cifar100': np.array([0.5071, 0.4867, 0.4408]),
+    'tinyImagenet': np.array([0.5, 0.5, 0.5])
 }
 std = {
     'MNIST': [0.3081],
     'FashionMNIST': [0.2859],
     'cifar10': np.array([0.24703233, 0.24348505, 0.26158768]),
     'cifar10-90': np.array([0.24703233, 0.24348505, 0.26158768]),
-    'cifar100': np.array([0.2675, 0.2565, 0.2761])
+    'cifar100': np.array([0.2675, 0.2565, 0.2761]),
+    'tinyImagenet': np.array([0.5, 0.5, 0.5])
 }
 dataset_classes = {
     'MNIST': torchvision.datasets.MNIST,
@@ -33,6 +79,7 @@ dataset_classes = {
     'cifar10': torchvision.datasets.CIFAR10,
     'cifar10-90': torchvision.datasets.CIFAR10,
     'cifar100': torchvision.datasets.CIFAR100
+    'tinyImagenet': TinyImageNet,
 }
 
 
@@ -54,10 +101,15 @@ def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2, nu
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomRotation(15),
                      ],
+        'tinyImagenet':[transforms.RandomCrop(64, padding=4),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.RandomRotation(15),
+                     ],
+
 
     }
     input_shape = {'MNIST': [1, 28, 28], 'FashionMNIST': [1, 28, 28], 'cifar10': [3, image_size, image_size],
-                   'cifar10-90': [3, image_size, image_size], 'cifar100': [3, 32, 32]}
+                   'cifar10-90': [3, image_size, image_size], 'cifar100': [3, 32, 32], 'tinyImagenet': [3, 64, 64]}
 
 
 
