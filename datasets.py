@@ -101,7 +101,8 @@ def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2, nu
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomRotation(15),
                      ],
-        'tinyImagenet':[transforms.RandomCrop(64, padding=4),
+        'tinyImagenet':[
+            # transforms.RandomCrop(64, padding=4),
                     transforms.RandomHorizontalFlip(),
                     transforms.RandomRotation(15),
                      ],
@@ -109,7 +110,7 @@ def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2, nu
 
     }
     input_shape = {'MNIST': [1, 28, 28], 'FashionMNIST': [1, 28, 28], 'cifar10': [3, image_size, image_size],
-                   'cifar10-90': [3, image_size, image_size], 'cifar100': [3, 32, 32], 'tinyImagenet': [3, 64, 64]}
+                   'cifar10-90': [3, image_size, image_size], 'cifar100': [3, 32, 32], 'tinyImagenet': [3, 32, 32]}
 
 
 
