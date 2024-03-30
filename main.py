@@ -114,7 +114,7 @@ if __name__ == "__main__":
         if args.dataset == "cifar100":
             model = resnet50cifar100(args.mode, int(args.model_layers)).to(device)
         elif args.dataset == "tinyImagenet":
-            model = resnet50cifar100(args.mode, int(args.model_layers)).to(device)
+            model = resnet50cifar100(args.mode, int(args.model_layers), num_classes=200).to(device)
         else:
             if mode == "greedy":
                 model = simpresnet.resnet50(num_classes=10, normalize=(args.normalize == "True"),

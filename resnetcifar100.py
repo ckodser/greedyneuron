@@ -150,7 +150,7 @@ def resnet34(mode):
     """
     return ResNet(mode, BasicBlock, [3, 4, 6, 3])
 
-def resnet50(mode, length=10000):
+def resnet50(mode, length=10000, num_classes=100):
     """ return a ResNet 50 object
     """
     num_blocks = [3, 4, 6, 3]
@@ -158,7 +158,7 @@ def resnet50(mode, length=10000):
         num_blocks[i] = min(num_blocks[i], length)
         length -= num_blocks[i]
 
-    return ResNet(mode, BottleNeck, num_blocks)
+    return ResNet(mode, BottleNeck, num_blocks, num_classes=num_classes)
 
 def resnet101(mode):
     """ return a ResNet 101 object
