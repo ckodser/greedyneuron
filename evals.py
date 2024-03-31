@@ -130,13 +130,12 @@ def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True
             # forward pass
             x, y = x.to(device), y.to(device)
             output = model(x)
+            _, predicted = torch.topk(output, 5, dim=1)  # Get the top 5 predicted classes
             loss_c = loss_func(output, y)
             output = torch.argmax(output, dim=1)
             loss += loss_c.detach().item()
             total += x.shape[0]
             correct += torch.sum(y == output).detach().item()
-
-            _, predicted = torch.topk(output, 5, dim=1)  # Get the top 5 predicted classes
             correct5 += torch.sum((y.unsqueeze(1).expand_as(predicted) == predicted).any(dim=1)).item()
 
         acc5 = (correct5 / total)
