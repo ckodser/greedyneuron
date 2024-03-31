@@ -105,7 +105,9 @@ def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2, nu
             transforms.RandomCrop(64, padding=4),
                     transforms.RandomHorizontalFlip(),
                     transforms.ColorJitter(brightness=.5, hue=.3),
-                    transforms.RandomRotation(15),
+                    transforms.RandomRotation(180),
+                    transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.)),
+                    transforms.RandomPerspective(distortion_scale=0.6, p=0.3)
                      ],
 
 
