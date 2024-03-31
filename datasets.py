@@ -102,8 +102,9 @@ def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2, nu
                     transforms.RandomRotation(15),
                      ],
         'tinyImagenet':[
-            # transforms.RandomCrop(64, padding=4),
+            transforms.RandomCrop(64, padding=4),
                     transforms.RandomHorizontalFlip(),
+                    transforms.ColorJitter(brightness=.5, hue=.3),
                     transforms.RandomRotation(15),
                      ],
 

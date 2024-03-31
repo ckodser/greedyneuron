@@ -123,6 +123,7 @@ def normal_eval_forgetting_hard(model, testDataloaders, epoch, loss_func, device
 def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True, dataset_name="validation"):
     with torch.no_grad():
         correct = 0
+        correct5= 0
         total = 0
         loss = 0
         for step, (x, y) in enumerate(testDataloader):
@@ -135,11 +136,16 @@ def normal_eval(model, testDataloader, epoch, loss_func, device="cuda", log=True
             total += x.shape[0]
             correct += torch.sum(y == output).detach().item()
 
+            _, predicted = torch.topk(output, 5, dim=1)  # Get the top 5 predicted classes
+            correct5 += torch.sum((y.unsqueeze(1).expand_as(predicted) == predicted).any(dim=1)).item()
+
+        acc5 = (correct5 / total)
         acc = (correct / total)
         loss = loss / len(testDataloader)
         if log:
             logwriter.log(f"performance_eval/{dataset_name}_loss", loss, epoch)
             logwriter.log(f"performance_eval/{dataset_name}_accuracy", acc, epoch)
+            logwriter.log(f"performance_eval/{dataset_name}_top5_accuracy", acc5, epoch)
 
     return acc, loss
 

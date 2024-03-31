@@ -193,6 +193,7 @@ if __name__ == "__main__":
             for key in model.state_dict():
                 best_model[key] = model.state_dict()[key].clone()
             best_acc = acc
+        normal_eval(model, testDataloader, epoch, loss_func, dataset_name="test")
     set_to_eval(model)
     acc, loss = normal_eval(model, valDataloader, epoch, loss_func)
     acc, loss = normal_eval(model, testDataloader, epoch, loss_func, dataset_name="test")
