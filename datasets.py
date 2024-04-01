@@ -20,6 +20,31 @@ import shutil
 from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
 
+
+class Food101(Dataset):
+    def __init__(self, root="./data", train=True, transform=None, download=False):
+        super().__init__()
+        self.root = root
+        self.train = train
+        self.transform = transform
+
+        self.data_dir = "/kaggle/input/food-101/food-101"
+
+        if download:
+            self.download()
+
+        self.dataset = ImageFolder(root=os.path.join(self.data_dir, "train" if self.train else "validation"), transform=self.transform)
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, index):
+        return self.dataset[index]
+
+    def download(self):
+        raise ValueError
+
+
 class TinyImageNet(Dataset):
     def __init__(self, root="./data", train=True, transform=None, download=True):
         super().__init__()
@@ -63,7 +88,8 @@ mean = {
     'cifar10': np.array([0.49139968, 0.48215827, 0.44653124]),
     'cifar10-90': np.array([0.49139968, 0.48215827, 0.44653124]),
     'cifar100': np.array([0.5071, 0.4867, 0.4408]),
-    'tinyImagenet': np.array([0.5, 0.5, 0.5])
+    'tinyImagenet': np.array([0.5, 0.5, 0.5]),
+    'Food101':np.array([0.5, 0.5, 0.5])
 }
 std = {
     'MNIST': [0.3081],
@@ -71,7 +97,8 @@ std = {
     'cifar10': np.array([0.24703233, 0.24348505, 0.26158768]),
     'cifar10-90': np.array([0.24703233, 0.24348505, 0.26158768]),
     'cifar100': np.array([0.2675, 0.2565, 0.2761]),
-    'tinyImagenet': np.array([0.5, 0.5, 0.5])
+    'tinyImagenet': np.array([0.5, 0.5, 0.5]),
+    'Food101': np.array([0.5, 0.5, 0.5])
 }
 dataset_classes = {
     'MNIST': torchvision.datasets.MNIST,
@@ -80,6 +107,7 @@ dataset_classes = {
     'cifar10-90': torchvision.datasets.CIFAR10,
     'cifar100': torchvision.datasets.CIFAR100,
     'tinyImagenet': TinyImageNet,
+    'Food101': Food101
 }
 
 
@@ -110,10 +138,14 @@ def get_dataloaders(dataset_name, batch_size, seed, image_size, val_frac=0.2, nu
                     transforms.RandomPerspective(distortion_scale=0.6, p=0.3)
                      ],
 
-
+        'Food101': [
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomRotation(15),
+        ],
     }
     input_shape = {'MNIST': [1, 28, 28], 'FashionMNIST': [1, 28, 28], 'cifar10': [3, image_size, image_size],
-                   'cifar10-90': [3, image_size, image_size], 'cifar100': [3, 32, 32], 'tinyImagenet': [3, 32, 32]}
+                   'cifar10-90': [3, image_size, image_size], 'cifar100': [3, 32, 32], 'tinyImagenet': [3, 32, 32],
+                   'Food101': [3, 32, 32]}
 
 
 

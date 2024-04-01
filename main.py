@@ -10,7 +10,7 @@ import argparse
 import simpresnet
 from resnet32x32 import ResNet18 as resnet32
 from resnetcifar100 import resnet50 as resnet50cifar100
-from resnettinyimagenet import resnet50 as resnet50tinyImagenet
+# from resnettinyimagenet import resnet50 as resnet50tinyImagenet
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -20,7 +20,7 @@ def get_args():
     parser.add_argument('--model_layers', default='2000,2000,2000,2000', type=str, )
     parser.add_argument('--mode', default='normal', type=str, choices={'greedy', 'normal', 'intel', 'greedyExtraverts'})
     parser.add_argument('--dataset', default='MNIST', type=str,
-                        choices={'MNIST', "FashionMNIST", "cifar10", "cifar100", 'cifar10-90', 'tinyImagenet'})
+                        choices={'MNIST', "FashionMNIST", "cifar10", "cifar100", 'cifar10-90', 'tinyImagenet', 'Food101'})
     parser.add_argument('--learning_rate', default=0.052, type=float)
     parser.add_argument('--weight_decay', default=0.0, type=float)
     parser.add_argument('--lr_scheduler', default="step", type=str)
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     if args.model_type == "resnet-50":
         if args.dataset == "cifar100":
             model = resnet50cifar100(args.mode, int(args.model_layers)).to(device)
-        elif args.dataset == "tinyImagenet":
+        elif args.dataset == "tinyImagenet" or args.dataset == "Food101":
             model = resnet50cifar100(args.mode, int(args.model_layers), num_classes=200).to(device)
         else:
             if mode == "greedy":
