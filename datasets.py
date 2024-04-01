@@ -22,16 +22,13 @@ from torchvision.datasets import ImageFolder
 
 
 class Food101(Dataset):
-    def __init__(self, root="./data", train=True, transform=None, download=False):
+    def __init__(self, root="./data", train=True, transform=None, download=True):
         super().__init__()
         self.root = root
         self.train = train
         self.transform = transform
 
         self.data_dir = "/kaggle/input/food-101/food-101"
-
-        if download:
-            self.download()
 
         self.dataset = ImageFolder(root=os.path.join(self.data_dir, "train" if self.train else "validation"), transform=self.transform)
 
@@ -40,9 +37,6 @@ class Food101(Dataset):
 
     def __getitem__(self, index):
         return self.dataset[index]
-
-    def download(self):
-        raise ValueError
 
 
 class TinyImageNet(Dataset):
